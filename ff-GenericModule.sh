@@ -23,12 +23,16 @@ outputfile	="/video/${FILENAME:0:$LENGTH-4}.mov"
 ffprog		="/PATH-TO-FFmbc or FFmpeg"	# Which ff program to use
 vidopts		=""				# Video options for ffprog
 audopts		=""				# Audio options for ffprog
+filtopts  =""       # Video or Audio Filter options
+#vidres   =""       # For Future Use
+#vidcodec =""       # For Future Use
+#vidid    =""       # For Future Use
 
 echo "===============$modulename Initialized - Converting $SOURCEPATH$FILENAME to MOV================"
 echo "$(date +%Y-%m-%d--%H:%M:%S) $modulename,"$SOURCEPATH$FILENAME >>/var/log/wdtv-VideoConversion.log
 #echo "====================FILENAME = $FILENAME ============================================"
 
-$ffprog -y -i $SOURCEPATH$FILENAME $vidopts $outputfile 2>>$logpath
+$ffprog -y -i $SOURCEPATH$FILENAME $filtopts $vidopts $outputfile 2>>$logpath
 
 # Remove Source File
 echo "============Removing file: $SOURCEPATH$FILENAME =========================="
