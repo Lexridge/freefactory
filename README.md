@@ -18,8 +18,11 @@ TODO:
 - Run under a user, and not root, which is presently the case.
 - Determine the best way to set up the /video/dropbox. My /video is actually a mount point for a 2TB RAID, but this will    vary widely with users.
 - Clean up the damn code!
-- Rewite in something better than BASH
+- Rewite in something better than BASH. Perhaps even database all the modules using either MySQL and/or PostgreSQL.
 
+I would love to get some help with this from people much more knowlegable than me.  My BASH writing is terrible, I am the first to admit it. If you, or you know somebody that may wish to contribute to this project, please notify me and I will allow access.
+
+I am presently running this on a dedicated eight core AMD 64bit ASUS system, with 8gb RAM which was custom built excluively for this project....rack mounted and headless. It is a fully dedicated system. It literally blows away our Telestream transcoder, which is also busy, but this machine is pretty killer! Oh, it also records news teases with a Blackmagic Duo card while transcoding video, without even a glitch! :)
 
 
 
