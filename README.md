@@ -19,6 +19,7 @@ TODO:
 - Determine the best way to set up the /video/dropbox. My /video is actually a mount point for a 2TB RAID, but this will    vary widely with users.
 - Clean up the damn code!
 - Rewite in something better than BASH. Perhaps even database all the modules using either MySQL and/or PostgreSQL.
+- Installer script will be finished soon. It builds both FFMPEG and FFMBC within the /opt/FreeFactory directory as        non-free, and contains it all there, to not interfer with your installed versions.
 
 I would love to get some help with this from people much more knowlegable than me.  My BASH writing is terrible, I am the first to admit it. If you, or you know somebody that may wish to contribute to this project, please notify me and I will allow access.
 
