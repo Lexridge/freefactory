@@ -1,9 +1,9 @@
 #!/bin/sh
 #  FreeFactory (c) 2013 by Jim Hines 
-#  Requirements: inotify-tools (namely inotifywait) and FFMPEG v10 (may work with older versions too.
+#  Requirements: inotify-tools (namely inotifywait) and FFMPEG and FFmbc
 #
 #  ff-crl.sh
-#  This script is the master control script. It calls sub-scripts to convert varies video files.
+#  This script is the master control script. It calls sub-scripts to convert various video files.
 #
 #  usage:inotifywait -rme close_write /video/dropbox | /opt/FreeFactory/bin/ff-ffctrl.sh &
 #
