@@ -1,7 +1,9 @@
 FreeFactory
 ===========
 
+==UPDATE==
 Everything is now here that is needed to run this. However, the installer script is not yet up to date with all the recent changes, so it is not yet available. Just copy the contents of all this to /opt/FreeFactory, and run the GUI from the /opt/FreeFactory/bin directory. ./FreeFactory.tcl. Also, the DOCs are really up to date, so look at them.
+==END UPDATE==
 
 A control script and modules that utilize the a/v transcoding functions of both FFmpeg and FFmbc to hopefully simplify video and audio transcoding for both Professionals and Enthusiast alike.
 
