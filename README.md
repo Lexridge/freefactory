@@ -1,6 +1,8 @@
 FreeFactory
 ===========
 
+Everything is now here that is needed to run this. However, the installer script is not yet up to date with all the recent changes, so it is not yet available. Just copy the contents of all this to /opt/FreeFactory, and run the GUI from the /opt/FreeFactory/bin directory. ./FreeFactory.tcl. Also, the DOCs are really up to date, so look at them.
+
 A control script and modules that utilize the a/v transcoding functions of both FFmpeg and FFmbc to hopefully simplify video and audio transcoding for both Professionals and Enthusiast alike.
 
 This functuions by setting up shared and watched directories that have specific scripts assigned to those folders. Inotify is used to watch these directories (for now, /video/dropbox/directorynames). When an audio or a/v file is copied into one of the watched directories, the FreeFactory recieves a notification from inotify, and lauches the correct factory module with FFmpeg or FFmbc paramaters to convert it to that particular output.
