@@ -29,7 +29,7 @@
 #  and then passes two of them, the directory path and the file
 #  name file name to the tcl conversion script.
 #############################################################################
-LOG=/opt/FreeFactory/Logs/FreeFactoryNotifyError.log
+LOG=/var/log/FreeFactory/FreeFactoryNotifyError.log
 ####################################################################################
 # This is what we want in the end so a \ will be added to spaces will be within
 # a file name.  This does not work right now.

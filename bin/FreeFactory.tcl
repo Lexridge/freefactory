@@ -518,7 +518,6 @@ proc ::writeSettingsFile {} {
 	puts $PrefFileHandle "FONTTEXT=$PPref(fonts,text)"
 	puts $PrefFileHandle "THECOMPANYNAME=$PPref(TheCompanyName)"
 	puts $PrefFileHandle "APPLEDELAY=$PPref(AppleDelay)"
-	puts $PrefFileHandle "NOTIFYRUNTIMEUSER=$PPref(NotifyRuntimeUser)"
 	puts $PrefFileHandle "PDFREADERPATH=$PPref(PDFReaderPath)"
 	puts $PrefFileHandle "FOUNDRYTOOLTIP=$PPref(Foundry,ToolTip)"
 	puts $PrefFileHandle "TOOLTIPFONTS=$PPref(fonts,ToolTip)"
@@ -717,11 +716,11 @@ proc vTclWindow. {base} {
 ##############################################################################
 ##########################
 # Company Variables
-	global TheCompanyName 
+	global TheCompanyName AppleDelay
 
 ##########################
 # Apple Delay Variables
-	global AppleDelay NotifyRuntimeUser
+
 
 ##########################
 # System Variables
@@ -783,7 +782,6 @@ proc vTclWindow. {base} {
 					"FONTTEXT" {set PPref(fonts,text) $PrefValue}
 					"THECOMPANYNAME" {set PPref(TheCompanyName) $PrefValue}
 					"APPLEDELAY" {set PPref(AppleDelay) $PrefValue}
-					"NOTIFYRUNTIMEUSER" {set PPref(NotifyRuntimeUser) $PrefValue}
 					"PDFREADERPATH" {set PPref(PDFReaderPath) $PrefValue}
 					"FOUNDRYTOOLTIP" {set PPref(Foundry,ToolTip) $PrefValue}
 					"TOOLTIPFONTS" {set PPref(fonts,ToolTip) $PrefValue}
@@ -802,7 +800,7 @@ proc vTclWindow. {base} {
 		close $PrefFileHandle
 		set TheCompanyName $PPref(TheCompanyName)
 		set AppleDelay $PPref(AppleDelay)
-		set NotifyRuntimeUser $PPref(NotifyRuntimeUser)
+
 	}
 	set FileHandle [open "/opt/FreeFactory/VERSION" r]
 	gets $FileHandle FreeFactoryInstalledVERSION

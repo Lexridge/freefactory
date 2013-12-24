@@ -138,6 +138,9 @@ proc {widgetUpdate} {} {
 		LabelFTPTransferType $LabelConfig1
 		RadioButtonFTPTransferTypeASC $RadioButtonConfig1
 		RadioButtonFTPTransferTypeBIN $RadioButtonConfig1
+		LabelFTPDeleteAfter $LabelConfig1
+		RadioButtonFTPDeleteAfterYes $RadioButtonConfig1
+		RadioButtonFTPDeleteAfterNo $RadioButtonConfig1
 		LabeledFrameVideoOptions $LabeledFrameConfig
 		FrameVideoCodecsWrapper $FrameConfig
 		ComboBoxVideoCodecsFactorySelection $ComboBoxConfigIWidgets
@@ -153,7 +156,6 @@ proc {widgetUpdate} {} {
 		ComboBoxThreadsFactorySelection $ComboBoxConfigIWidgets
 		FrameStreamIDBFrames $FrameConfig
 		EntryVideoStreamIDFactorySelection $EntryConfigIWidgets
-#		ComboBoxVideoStreamIDFactorySelection $ComboBoxConfigIWidgets
 		EntryBFramesFactorySelection $EntryConfigIWidgets
 		EntryFrameESrategyFactorySelection $EntryConfigIWidgets
 		FrameGroupPicSize $FrameConfig
@@ -171,11 +173,14 @@ proc {widgetUpdate} {} {
 		ComboBoxAudioTagFactorySelection $ComboBoxConfigIWidgets
 		ComboBoxAudioChannelsFactorySelection $ComboBoxConfigIWidgets
 		EntryAudioStreamIDFactorySelection $EntryConfigIWidgets
-		FrameDeleteLog $FrameConfig
+		LabeledFrameOtherFactoryOptions $LabeledFrameConfig
+		CheckButtonEnableFactory $CheckButtonConfig1
+		LabelDeleteSource $LabelConfig1
+		RadioButtonDeleteSourceYes $RadioButtonConfig1
+		RadioButtonDeleteSourceNo $RadioButtonConfig1
 		LabelDeleteLog $LabelConfig1
 		RadioButtonDeleteConversionLogsYes $RadioButtonConfig1
 		RadioButtonDeleteConversionLogsNo $RadioButtonConfig1
-#		ComboBoxAudioStreamIDFactorySelection $ComboBoxConfigIWidgets
 		FrameFooterMaster $FrameConfig
 		FrameFooterTime $FrameConfig
 		EntrySolutionStatusProgramFrontEnd $EntryConfigLabel
@@ -473,11 +478,12 @@ proc {widgetUpdate} {} {
 		FrameNotifyDirectoryButton
 		ButtonNewDirectory $ButtonConfig1
 		ButtonSaveDirectory $ButtonConfig1
+		ButtonUpdateDirectory $ButtonConfig1
 		ButtonRewriteInotifyStartupDirectory
 		ButtonDeleteDirectory $ButtonConfig1
-		NumberOfFFProcessesEntry $EntryConfigLabelIWidgets
 		LabeledFrameFreeFactoryRunningProcessesSettings $LabeledFrameConfig
 		ScrolledListBoxFactoryRunningProcesses $ScrolledListBoxConfigIWidgets
+		NumberOfFFProcessesEntry $EntryConfigLabelIWidgets
 		ButtonFrameRunningFFProcesses $FrameConfig
 		ButtonStartNotifyFreeFactory $ButtonConfig1
 		ButtonRestartNotifyFreeFactory $ButtonConfig1

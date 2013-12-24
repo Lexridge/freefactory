@@ -42,7 +42,7 @@ proc vTclWindow.settings {base} {
 
 ##########################
 # Free Factory Variables
-	global AppleDelay NumberOfFFProcesses FFProcessList SelectedDirectoryPath SelectedDirectoryPathOrg NotifyDirectoryList NumberOfDirectories NotifyRuntimeUser ShowProcess
+	global AppleDelay NumberOfFFProcesses FFProcessList SelectedDirectoryPath NotifyDirectoryList NumberOfDirectories NotifyRuntimeUser ScrollBoxItemPos ShowProcess
 
 ##########################
 # Settings Variables
@@ -85,7 +85,6 @@ proc vTclWindow.settings {base} {
     bind $top <Control-Left> {.settings.settingsTabNotebook prev}
 
 #    bind $top <ButtonRelease-3> {
-# 	exec echo "%W" >> /home/karl/Data/WidgetPath
 #	tk_messageBox -message %W
 #	}
 
@@ -231,7 +230,7 @@ proc vTclWindow.settings {base} {
 
 	pack $site_10_1.frameColorAdjustMaster -in $site_10_1 -anchor ne -expand 1 -fill both -side top
 
-	::iwidgets::combobox $site_10_1.settingsDisplayParametersComboBox -command {} \
+	::iwidgets::combobox $site_10_1.settingsDisplayParametersComboBox -command {} -width 25 \
 	-highlightthickness 0 -labelpos w -labeltext "Display Parameter" -selectioncommand {
 		global PPrefTmp
 		set currentColorWidget [DisplayParametersComboBoxSettings getcurselection]
@@ -788,22 +787,6 @@ proc vTclWindow.settings {base} {
 	bind $BindWidgetEntry <Control-Left> {}
 	bind $BindWidgetEntry <Control-Right> {}
 
-	::iwidgets::combobox $site_8_6_0.notifyRuntimeUserComboBoxFactorySettings -labeltext "Notify Runtime User" -labelpos w \
-        -textvariable NotifyRuntimeUser -justify left -width 15 -listheight 150 -highlightthickness 0 -command {
-		set PPref(NotifyRuntimeUser) $NotifyRuntimeUser
-		CheckForSettingsApplyEnable
-	}  -selectioncommand {
-		set PPref(NotifyRuntimeUser) $NotifyRuntimeUser
-		CheckForSettingsApplyEnable
-	} 
-	vTcl:DefineAlias "$site_8_6_0.notifyRuntimeUserComboBoxFactorySettings" "ComboBoxNotifyRuntimeUserSettings" vTcl:WidgetProc "Toplevel1" 1
-	set BindWidgetEntry "$site_8_6_0.notifyRuntimeUserComboBoxFactorySettings.lwchildsite.entry"
-	vTcl:DefineAlias "$BindWidgetEntry" "EntryComboBoxNotifyRuntimeUserSettingsChild" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_8_6_0.notifyRuntimeUserComboBoxFactorySettings -in $site_8_6_0 -anchor w -expand 1 -fill none -side left
-	bind $BindWidgetEntry <FocusOut> {
-		set PPref(NotifyRuntimeUser) $NotifyRuntimeUser
-		CheckForSettingsApplyEnable
-	}
  	pack $site_8_6.freeFactoryOptionsFrame -in $site_8_6 -anchor center -expand 1 -fill x -side top
 
 	::iwidgets::labeledframe $site_8_6.freeFactoryNotifyDirectoriesFrame -labelpos nw -labeltext "Free Factory Notify Directories"
@@ -816,8 +799,13 @@ proc vTclWindow.settings {base} {
 	-hscrollmode dynamic -selectmode single -jump 0 -labelpos n -labeltext "" -relief sunken \
 	-sbwidth 10 -selectbackground #c4c4c4 -selectborderwidth 1 -selectforeground black -state normal \
 	-textbackground #d9d9d9 -troughcolor #c4c4c4 -vscrollmode dynamic -dblclickcommand {} -selectioncommand {
-		set SelectedDirectoryPath [ScrolledListBoxFactoryNotifyDirectories get [ScrolledListBoxFactoryNotifyDirectories curselection ]]
+		set ScrollBoxItemPos [ScrolledListBoxFactoryNotifyDirectories curselection ]
+		set SelectedDirectoryPath [ScrolledListBoxFactoryNotifyDirectories get $ScrollBoxItemPos]
 		set SelectedDirectoryPathOrg $SelectedDirectoryPath
+		set NotifyRuntimeUser [lindex $NotifyDirectoryList($ScrollBoxItemPos) 1]
+		ButtonUpdateDirectory configure -state normal
+		ButtonSaveDirectory configure -state disable
+
 	} -width 254
 	vTcl:DefineAlias "$site_8_6_0.factoryNotifyDirectoriesListBox" "ScrolledListBoxFactoryNotifyDirectories" vTcl:WidgetProc "Toplevel1" 1
 	pack $site_8_6_0.factoryNotifyDirectoriesListBox -in $site_8_6_0 -anchor n -expand 1 -fill both -side top
@@ -833,6 +821,12 @@ proc vTclWindow.settings {base} {
 	set BindWidgetEntry "$site_8_6_1.selectedDirectoryEntry.lwchildsite.entry"
 	vTcl:DefineAlias "$BindWidgetEntry" "EntrySelectedDirectoryChild" vTcl:WidgetProc "Toplevel1" 1
 	pack $site_8_6_1.selectedDirectoryEntry -in $site_8_6_1 -anchor w -expand 1 -fill x -side left
+	bind $BindWidgetEntry <FocusOut> {
+# If notify directory path does not end in a slash then append it.
+		if {[expr [string last "/" $SelectedDirectoryPath] + 1] < [string length $SelectedDirectoryPath]} {
+			append SelectedDirectoryPath "/"
+		}
+	}
         bind $BindWidgetEntry <Key-Return> {}
         bind $BindWidgetEntry <Key-KP_Enter> {}
 
@@ -844,8 +838,8 @@ proc vTclWindow.settings {base} {
 		set toolTip "Select Directory"
 		Window show .directoryDialog
 		Window show .directoryDialog
-		if {$NotifyDirectoryEntry !=""} {
-			set fullDirPath [file dirname $NotifyDirectoryEntry]
+		if {$SelectedDirectoryPath !=""} {
+			set fullDirPath [file dirname $SelectedDirectoryPath]
 		} else {
 			set fullDirPath "/"
 		}
@@ -867,17 +861,26 @@ proc vTclWindow.settings {base} {
 
  	pack $site_8_6_0.nofifyDirectoryEntryFrame -in $site_8_6_0 -anchor w -expand 0 -fill x -side top
 
+	::iwidgets::combobox $site_8_6_0.notifyRuntimeUserComboBoxFactorySettings -labeltext "Notify Runtime User" -labelpos w \
+        -textvariable NotifyRuntimeUser -justify left -width 15 -listheight 150 -highlightthickness 0 -command {}  -selectioncommand {}
+	vTcl:DefineAlias "$site_8_6_0.notifyRuntimeUserComboBoxFactorySettings" "ComboBoxNotifyRuntimeUserSettings" vTcl:WidgetProc "Toplevel1" 1
+	set BindWidgetEntry "$site_8_6_0.notifyRuntimeUserComboBoxFactorySettings.lwchildsite.entry"
+	vTcl:DefineAlias "$BindWidgetEntry" "EntryComboBoxNotifyRuntimeUserSettingsChild" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_6_0.notifyRuntimeUserComboBoxFactorySettings -in $site_8_6_0 -anchor w -expand 1 -fill none -side top
+	bind $BindWidgetEntry <FocusOut> {}
+
 	frame $site_8_6_0.nofifyDirectoryButtonFrame -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
 	vTcl:DefineAlias "$site_8_6_0.nofifyDirectoryButtonFrame" "FrameNotifyDirectoryButton" vTcl:WidgetProc "Toplevel1" 1
 
 	set site_8_6_2 $site_8_6_0.nofifyDirectoryButtonFrame
 
-
 	button $site_8_6_2.newDirectoryButton \
 	-activebackground #f9f9f9 -activeforeground black \
 	-command {
 		set SelectedDirectoryPath ""
-		set SelectedDirectoryOrg ""
+		set NotifyRuntimeUser ""
+		ButtonUpdateDirectory configure -state disable
+		ButtonSaveDirectory configure -state normal
 		focus .settings.settingsTabNotebook.canvas.notebook.cs.page3.cs.freeFactoryNotifyDirectoriesFrame.childsite.nofifyDirectoryEntryFrame.selectedDirectoryEntry.lwchildsite.entry
 	} -foreground black -highlightcolor black -text "New"
 	vTcl:DefineAlias "$site_8_6_2.newDirectoryButton" "ButtonNewDirectory" vTcl:WidgetProc "Toplevel1" 1
@@ -887,69 +890,49 @@ proc vTclWindow.settings {base} {
 	button $site_8_6_2.saveDirectoryButton \
 	-activebackground #f9f9f9 -activeforeground black \
 	-command {
-		set NotFound ""
-# First check to make sure SelectedDirectoryPath variable
-# is not a null string or a string with only spaces.
-		if {[string trim $SelectedDirectoryPath] != ""} {
-# We have characters in the variable
-# Check for duplicate
-			for {set x 0} {$x <= $NumberOfDirectories} {incr x} {
-# Checking to see if the path being saved is already in the list
-				if {[string trim $NotifyDirectoryList($x)] == [string trim $SelectedDirectoryPath]} {
-# If found same directory path then should not save.
-					set NotFound "Found"
-				}
+			if {$PPref(ConfirmFileSaves) == "Yes"} {
+				set GenericConfirm 2
+				Window show .genericConfirm
+				widgetUpdate
+				set GenericConfirmName "Save $SelectedDirectoryPath notify directory ?"
+				wm title .genericConfirm "Save Directory Confirmation"
+				tkwait window .genericConfirm
+				if {$GenericConfirm == 1} {SaveDirectoryList}
+			} else {
+				SaveDirectoryList
 			}
-			if {$NotFound == ""} {
-				set NewNotifyPathWritten "No"
-				set FileHandle [open "/opt/FreeFactory/FreeFactoryNotifyDirectoryList" w]
-				for {set x 0} {$x <= $NumberOfDirectories} {incr x} {
-					if {[string trim $NotifyDirectoryList($x)] == [string trim $SelectedDirectoryPathOrg] && [string trim $SelectedDirectoryPath] != [string trim $SelectedDirectoryPathOrg]} {
-# If found same directory path to the original and the variables are not the same
-# Then we over write
-						puts $FileHandle $SelectedDirectoryPath
-						set NewNotifyPathWritten "Yes"
-					} else {
-						puts $FileHandle $NotifyDirectoryList($x)
-					}
-				}
-# If path variable not written then it must be a new path and append
-# to the file.
-				if {$NewNotifyPathWritten == "No"} {
-					puts $FileHandle $SelectedDirectoryPath
-				}
-				close $FileHandle
-				set SelectedDirectoryPath ""
-				set SelectedDirectoryPathOrg ""
-				GetNotifyDirectoryList
-			}
-		}
+
 	} -foreground black -highlightcolor black -text "Save"
 	vTcl:DefineAlias "$site_8_6_2.saveDirectoryButton" "ButtonSaveDirectory" vTcl:WidgetProc "Toplevel1" 1
 	pack $site_8_6_2.saveDirectoryButton -in $site_8_6_2 -anchor center -expand 1 -fill none -side left
 	balloon $site_8_6_2.saveDirectoryButton "This saves the notify directory list. It is\nnot saved with the other settings data\nand this save only saves this notify\ndirectory list."
 
-	button $site_8_6_2.deleteDirectoryButton \
+	button $site_8_6_2.updateDirectoryButton \
 	-activebackground #f9f9f9 -activeforeground black \
 	-command {
 # First check to make sure SelectedDirectoryPath variable
 # is not a null string or a string with only spaces.
 		if {[string trim $SelectedDirectoryPath] != ""} {
-# We have characters in the variable
-# Check for duplicate
-			set FileHandle [open "/opt/FreeFactory/FreeFactoryNotifyDirectoryList" w]
-			for {set x 0} {$x <= $NumberOfDirectories} {incr x} {
-# Only write to the file if directory path does not equal the path in the variable.
-				if {[string trim $NotifyDirectoryList($x)] != [string trim $SelectedDirectoryPath]} {
-					puts $FileHandle $NotifyDirectoryList($x)
-				}
+# If notify directory path does not end in a slash then append it.
+			if {$PPref(ConfirmFileSaves) == "Yes"} {
+				set GenericConfirm 2
+				Window show .genericConfirm
+				widgetUpdate
+				set GenericConfirmName "Update $SelectedDirectoryPath notify directory ?"
+				wm title .genericConfirm "Update Directory Confirmation"
+				tkwait window .genericConfirm
+				if {$GenericConfirm == 1} {UpdateDirectoryList}
+			} else {
+				UpdateDirectoryList
 			}
-			close $FileHandle
-			set SelectedDirectoryPath ""
-			set SelectedDirectoryPathOrg ""
-			GetNotifyDirectoryList
 		}
-	} -foreground black -highlightcolor black -text "Delete"
+	} -foreground black -highlightcolor black -text "Update"
+	vTcl:DefineAlias "$site_8_6_2.updateDirectoryButton" "ButtonUpdateDirectory" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_6_2.updateDirectoryButton -in $site_8_6_2 -anchor center -expand 1 -fill none -side left
+	balloon $site_8_6_2.updateDirectoryButton "This updates the notify directory list. It is\nnot updated with the other settings data\nand this update only updates this notify\ndirectory list."
+
+	button $site_8_6_2.deleteDirectoryButton \
+	-activebackground #f9f9f9 -activeforeground black -command {DeleteNotifyDirectory} -foreground black -highlightcolor black -text "Delete"
 	vTcl:DefineAlias "$site_8_6_2.deleteDirectoryButton" "ButtonDeleteDirectory" vTcl:WidgetProc "Toplevel1" 1
 	pack $site_8_6_2.deleteDirectoryButton -in $site_8_6_2 -anchor w -expand 1 -fill none -side left
 	balloon $site_8_6_2.deleteDirectoryButton "This deletes the directory path\nfrom the notify directory list."
@@ -958,33 +941,6 @@ proc vTclWindow.settings {base} {
 	-activebackground #f9f9f9 -activeforeground black \
 	-command {
 		set FileHandle [open "/opt/FreeFactory/bin/InotifyStartupUser.sh" w]
-
-#############################################################################
-#               This code is licensed under the GPLv3
-#    The following terms apply to all files associated with the software
-#    unless explicitly disclaimed in individual files or parts of files.
-#
-#                           Free Factory
-#
-#                          Copyright 2013
-#                               by
-#                     Jim Hines and Karl Swisher
-#
-#    This program is free software; you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation; either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program; if not, write to the Free Software
-#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-
 		puts $FileHandle "#!/bin/bash"
 		puts $FileHandle "#############################################################################"
 		puts $FileHandle "#               This code is licensed under the GPLv3"
@@ -1025,89 +981,84 @@ proc vTclWindow.settings {base} {
 		puts $FileHandle "#"
 		puts $FileHandle "#"
 		puts $FileHandle "#############################################################################"
-		for {set x 0} {$x <= $NumberOfDirectories} {incr x} {
-			if {[string trim $NotifyDirectoryList($x)] != ""} {
-				set LastSlash [string last "/" [string trim $NotifyDirectoryList($x)]]
-				set NotifyDirectoryTmp [string range [string trim $NotifyDirectoryList($x)] 0 [expr $LastSlash -1]]
-				puts $FileHandle "inotifywait -rme close_write $NotifyDirectoryTmp | /opt/FreeFactory/bin/FreeFactoryNotify.sh&"
+		for {set x 0} {$x < $NumberOfDirectories} {incr x} {
+# Extract directory path from list variable
+			set NotifyDirPath [lindex $NotifyDirectoryList($x) 0]
+# Must remove the last slash for command line use.
+			set LastSlash [string last "/" [string trim $NotifyDirPath]]
+			set NotifyDirectoryTmp [string range $NotifyDirPath 0 [expr $LastSlash -1]]
+			puts $FileHandle "inotifywait -rme close_write $NotifyDirectoryTmp | /opt/FreeFactory/bin/FreeFactoryNotify.sh 2>> /var/log/FreeFactory/InotifyStartupUser.log&"
+		}
+		puts $FileHandle "exit"
+		close $FileHandle
+		set FileHandle [open "/opt/FreeFactory/bin/InotifyStartupRoot.sh" w]
+		puts $FileHandle "#!/bin/bash"
+		puts $FileHandle "#############################################################################"
+		puts $FileHandle "#               This code is licensed under the GPLv3"
+		puts $FileHandle "#    The following terms apply to all files associated with the software"
+		puts $FileHandle "#    unless explicitly disclaimed in individual files or parts of files."
+		puts $FileHandle "#"
+		puts $FileHandle "#                           Free Factory"
+		puts $FileHandle "#"
+		puts $FileHandle "#                          Copyright 2013"
+		puts $FileHandle "#                               by"
+		puts $FileHandle "#                     Jim Hines and Karl Swisher"
+		puts $FileHandle "#"
+		puts $FileHandle "#    This program is free software; you can redistribute it and/or modify"
+		puts $FileHandle "#    it under the terms of the GNU General Public License as published by"
+		puts $FileHandle "#    the Free Software Foundation; either version 3 of the License, or"
+		puts $FileHandle "#    (at your option) any later version."
+		puts $FileHandle "#"
+		puts $FileHandle "#    This program is distributed in the hope that it will be useful,"
+		puts $FileHandle "#    but WITHOUT ANY WARRANTY; without even the implied warranty of"
+		puts $FileHandle "#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the"
+		puts $FileHandle "#    GNU General Public License for more details."
+		puts $FileHandle "#"
+		puts $FileHandle "#    You should have received a copy of the GNU General Public License"
+		puts $FileHandle "#    along with this program; if not, write to the Free Software"
+		puts $FileHandle "#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA"
+		puts $FileHandle "#"
+		puts $FileHandle "# Script Name: InotifyStartupRoot.sh"
+		puts $FileHandle "# This script is created from the FreeFactory gui."
+		puts $FileHandle "#"
+		puts $FileHandle "# Startup for Free Factory runtime video conversion software.  This script"
+		puts $FileHandle "# starts inotifywait. This script meant to be run as root from rc.local.  The"
+		puts $FileHandle "# individual process will run under the user contained in the command line."
+		puts $FileHandle "#"
+		puts $FileHandle "# Usage:/opt/FreeFactory/bin/InotifyStartupRoot.sh"
+		puts $FileHandle "#"
+		puts $FileHandle "# Any manual edit changes may be over written by the Free Factory gui."
+		puts $FileHandle "#"
+		puts $FileHandle "#"
+		puts $FileHandle "#############################################################################"
+		for {set x 0} {$x < $NumberOfDirectories} {incr x} {
+# Extract directory path from list variable
+			set NotifyDirPath [lindex $NotifyDirectoryList($x) 0]
+# Extract user from list variable
+			set NotifyDirUser [lindex $NotifyDirectoryList($x) 1]
+# Only add notify directory if user is not blank.
+			if {[string trim $NotifyDirUser] != ""} {
+# Must remove the last slash for command line use.
+				set LastSlash [string last "/" [string trim $NotifyDirPath]]
+				set NotifyDirectoryTmp [string range $NotifyDirPath 0 [expr $LastSlash -1]]
+				puts $FileHandle "su -c \"inotifywait -rme close_write $NotifyDirectoryTmp | /opt/FreeFactory/bin/FreeFactoryNotify.sh 2>> /var/log/FreeFactory/InotifyStartupUser.log\" $NotifyDirUserr &"
 			}
 		}
 		puts $FileHandle "exit"
 		close $FileHandle
-		if {[string trim $NotifyRuntimeUser] != ""} {
-			set FileHandle [open "/opt/FreeFactory/bin/InotifyStartupRoot.sh" w]
-			puts $FileHandle "#!/bin/bash"
-			puts $FileHandle "#############################################################################"
-			puts $FileHandle "#               This code is licensed under the GPLv3"
-			puts $FileHandle "#    The following terms apply to all files associated with the software"
-			puts $FileHandle "#    unless explicitly disclaimed in individual files or parts of files."
-			puts $FileHandle "#"
-			puts $FileHandle "#                           Free Factory"
-			puts $FileHandle "#"
-			puts $FileHandle "#                          Copyright 2013"
-			puts $FileHandle "#                               by"
-			puts $FileHandle "#                     Jim Hines and Karl Swisher"
-			puts $FileHandle "#"
-			puts $FileHandle "#    This program is free software; you can redistribute it and/or modify"
-			puts $FileHandle "#    it under the terms of the GNU General Public License as published by"
-			puts $FileHandle "#    the Free Software Foundation; either version 3 of the License, or"
-			puts $FileHandle "#    (at your option) any later version."
-			puts $FileHandle "#"
-			puts $FileHandle "#    This program is distributed in the hope that it will be useful,"
-			puts $FileHandle "#    but WITHOUT ANY WARRANTY; without even the implied warranty of"
-			puts $FileHandle "#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the"
-			puts $FileHandle "#    GNU General Public License for more details."
-			puts $FileHandle "#"
-			puts $FileHandle "#    You should have received a copy of the GNU General Public License"
-			puts $FileHandle "#    along with this program; if not, write to the Free Software"
-			puts $FileHandle "#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA"
-			puts $FileHandle "#"
-			puts $FileHandle "# Script Name: InotifyStartupRoot.sh"
-			puts $FileHandle "# This script is created from the FreeFactory gui."
-			puts $FileHandle "#"
-			puts $FileHandle "# Startup for Free Factory runtime video conversion software.  This script"
-			puts $FileHandle "# starts inotifywait. This script meant to be run as root from rc.local.  The"
-			puts $FileHandle "# individual process will run under the user contained in the command line."
-			puts $FileHandle "#"
-			puts $FileHandle "# Usage:/opt/FreeFactory/bin/InotifyStartupRoot.sh"
-			puts $FileHandle "#"
-			puts $FileHandle "# Any manual edit changes may be over written by the Free Factory gui."
-			puts $FileHandle "#"
-			puts $FileHandle "#"
-			puts $FileHandle "#############################################################################"
-			for {set x 0} {$x <= $NumberOfDirectories} {incr x} {
-				if {[string trim $NotifyDirectoryList($x)] != ""} {
-					set LastSlash [string last "/" [string trim $NotifyDirectoryList($x)]]
-					set NotifyDirectoryTmp [string range [string trim $NotifyDirectoryList($x)] 0 [expr $LastSlash -1]]
-					puts $FileHandle "su -c \"inotifywait -rme close_write $NotifyDirectoryTmp | /opt/FreeFactory/bin/FreeFactoryNotify.sh\" $NotifyRuntimeUser &"
-				}
-			}
-			puts $FileHandle "exit"
-			close $FileHandle
-		}
 	} -foreground black -highlightcolor black -text "Rewrite Startup"
 	vTcl:DefineAlias "$site_8_6_2.rewriteInotifyStartupButton" "ButtonRewriteInotifyStartupDirectory" vTcl:WidgetProc "Toplevel1" 1
 	pack $site_8_6_2.rewriteInotifyStartupButton -in $site_8_6_2 -anchor e -expand 1 -fill none -side right
 	balloon $site_8_6_2.rewriteInotifyStartupButton "This rewrites the InotifyStartupUser.sh\nand InotifyStartupRoot.sh files. The\nscripts may be started or restarted\nto reflect any changes."
 
-
- 	pack $site_8_6_0.nofifyDirectoryButtonFrame -in $site_8_6_0 -anchor w -expand 0 -fill x -side top
-
-	::iwidgets::entryfield $site_8_6_0.numberOfNotifyProcessesEntry -width 5 -labelpos w -justify right -relief flat \
-	-labeltext "Number of Free Factory processes:" -textvariable NumberOfFFProcesses
-	vTcl:DefineAlias "$site_8_6_0.numberOfNotifyProcessesEntry" "NumberOfFFProcessesEntry" vTcl:WidgetProc "Toplevel1" 1
-	set BindWidgetEntry "$site_8_6_0.numberOfNotifyProcessesEntry.lwchildsite.entry"
-	vTcl:DefineAlias "$BindWidgetEntry" "EntryNumberOfFFProcessesChild" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_8_6_0.numberOfNotifyProcessesEntry -in $site_8_6_0 -anchor w -expand 1 -fill none -side top
-        bind $BindWidgetEntry <Key-Return> {}
-        bind $BindWidgetEntry <Key-KP_Enter> {}
+	pack $site_8_6_0.nofifyDirectoryButtonFrame -in $site_8_6_0 -anchor w -expand 0 -fill x -side top
 
 	::iwidgets::labeledframe $site_8_6_0.freeFactoryRunningProcessesFrame -labelpos nw -labeltext "Free Factory Running Processes"
 	vTcl:DefineAlias "$site_8_6_0.freeFactoryRunningProcessesFrame" "LabeledFrameFreeFactoryRunningProcessesSettings" vTcl:WidgetProc "Toplevel1" 1
 
 	set site_8_6_3 [$site_8_6_0.freeFactoryRunningProcessesFrame childsite]
 
- 	pack $site_8_6_0.freeFactoryRunningProcessesFrame -in $site_8_6_0 -anchor center -expand 1 -fill both -side top
+	pack $site_8_6_0.freeFactoryRunningProcessesFrame -in $site_8_6_0 -anchor center -expand 1 -fill both -side top
 
 	::iwidgets::scrolledlistbox $site_8_6_3.factoryRunningProcessesListBox -activebackground #f9f9f9 -activerelief raised -background #e6e6e6 \
 	-borderwidth 2 -disabledforeground #a3a3a3 -foreground #000000 -height 100 -highlightcolor black -highlightthickness 1 \
@@ -1119,6 +1070,14 @@ proc vTclWindow.settings {base} {
 	vTcl:DefineAlias "$site_8_6_3.factoryRunningProcessesListBox" "ScrolledListBoxFactoryRunningProcesses" vTcl:WidgetProc "Toplevel1" 1
 	pack $site_8_6_3.factoryRunningProcessesListBox -in $site_8_6_3 -anchor n -expand 1 -fill both -side top
 
+	::iwidgets::entryfield $site_8_6_3.numberOfNotifyProcessesEntry -width 5 -labelpos w -justify right -relief flat \
+	-labeltext "Number of Free Factory processes:" -textvariable NumberOfFFProcesses
+	vTcl:DefineAlias "$site_8_6_3.numberOfNotifyProcessesEntry" "NumberOfFFProcessesEntry" vTcl:WidgetProc "Toplevel1" 1
+	set BindWidgetEntry "$site_8_6_3.numberOfNotifyProcessesEntry.lwchildsite.entry"
+	vTcl:DefineAlias "$BindWidgetEntry" "EntryNumberOfFFProcessesChild" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_6_3.numberOfNotifyProcessesEntry -in $site_8_6_3 -anchor w -expand 1 -fill none -side top
+        bind $BindWidgetEntry <Key-Return> {}
+        bind $BindWidgetEntry <Key-KP_Enter> {}
 
 	frame $site_8_6_3.runningFFProcessesRadioButtonFrame -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
 	vTcl:DefineAlias "$site_8_6_3.runningFFProcessesRadioButtonFrame" "RadioButtonFrameRunningFFProcesses" vTcl:WidgetProc "Toplevel1" 1
@@ -1252,9 +1211,8 @@ proc vTclWindow.settings {base} {
 	pack $site_8_7_0_1.browsePDFReaderPathButton -in $site_8_7_0_1 -anchor nw -expand 0 -fill none -side right
 	balloon $site_8_7_0_1.browsePDFReaderPathButton "Browse"
 
- 	pack $site_8_7_0.framePDFReaderPath -in $site_8_7_0 -anchor center -expand 1 -fill x -side top
- 	pack $site_8_7.filePathFrame -in $site_8_7 -anchor center -expand 1 -fill x -side top
-
+	pack $site_8_7_0.framePDFReaderPath -in $site_8_7_0 -anchor center -expand 1 -fill x -side top
+	pack $site_8_7.filePathFrame -in $site_8_7 -anchor center -expand 1 -fill x -side top
 
 	::iwidgets::labeledframe $site_8_7.selectionOptionsFrame -labelpos nw -labeltext "Text Selection Options"
 	vTcl:DefineAlias "$site_8_7.selectionOptionsFrame" "LabeledFrameSelectionOptionsSettings" vTcl:WidgetProc "Toplevel1" 1
@@ -1312,12 +1270,9 @@ proc vTclWindow.settings {base} {
 
 #############################################################################
 #############################################################################
-
     $top.settingsTabNotebook select 0
-
 #############################################################################
 #Bottom Buuttons Here
-
 	frame $top.footerFrame -height 25 -relief flat -width 430  -borderwidth 0
 	vTcl:DefineAlias "$top.footerFrame" "FrameFooterSettings" vTcl:WidgetProc "Toplevel1" 1
 
@@ -1365,7 +1320,6 @@ proc vTclWindow.settings {base} {
 		set PPref(ShowToolTips) $PPrefTmp(ShowToolTips)
 		set PPref(TheCompanyName) $TheCompanyName
 		set PPref(AppleDelay) $AppleDelay
-		set PPref(NotifyRuntimeUser) $NotifyRuntimeUser
 		widgetUpdate
 
 # If CreateUpdateFile is checked then set the file
@@ -1391,7 +1345,6 @@ proc vTclWindow.settings {base} {
 		set PPrefTmp(ShowToolTips) $ShowToolTips
 		set PPrefTmp(TheCompanyName) $TheCompanyName
 		set PPrefTmp(AppleDelay) $AppleDelay
-		set PPrefTmp(NotifyRuntimeUser) $NotifyRuntimeUser
 		set PPref(color,window,fore) $PPrefTmp(color,window,fore)
 		set PPref(color,window,back) $PPrefTmp(color,window,back)
 		set PPref(color,widget,fore) $PPrefTmp(color,widget,fore)
@@ -1450,7 +1403,6 @@ proc vTclWindow.settings {base} {
 		set PPrefRestore(ShowToolTips) $PPrefTmp(ShowToolTips)
 		set PPrefRestore(TheCompanyName) $TheCompanyName
 		set PPrefRestore(AppleDelay) $AppleDelay
-		set PPrefRestore(NotifyRuntimeUser) $NotifyRuntimeUser
 		widgetUpdate
 		CheckForSettingsApplyEnable
 
@@ -1494,7 +1446,6 @@ proc vTclWindow.settings {base} {
 		set PPrefTmp(ShowToolTips) $PPrefRestore(ShowToolTips)
 		set PPrefRestore(TheCompanyName) $PPrefTmp(TheCompanyName)
 		set PPrefRestore(AppleDelay) $PPrefTmp(AppleDelay)
-		set PPrefRestore(NotifyRuntimeUser) $PPrefTmp(NotifyRuntimeUser)
 		if {$currentColorWidget == "Window Foreground"} {set tmpcolor $PPrefTmp(color,window,fore)}
 		if {$currentColorWidget == "Window Background"} {set tmpcolor $PPrefTmp(color,window,back)}
 		if {$currentColorWidget == "Active Foreground"} {set tmpcolor $PPrefTmp(color,active,fore)}
@@ -1615,7 +1566,6 @@ proc vTclWindow.settings {base} {
 		set ShowToolTips $PPrefRestore(ShowToolTips)
 		set PPrefTmp(TheCompanyName) $PPrefRestore(TheCompanyName)
 		set PPrefTmp(AppleDelay) $PPrefRestore(AppleDelay)
-		set PPrefTmp(NotifyRuntimeUser) $PPrefRestore(NotifyRuntimeUser)
 		widgetUpdate
 # Run sub routine to display the icon button frames if selected
 		destroy window .settings
@@ -1881,18 +1831,17 @@ proc ::initSettings {} {
 
 # Start Initialize Free Factory variables
 	set SelectedDirectoryPath ""
-	set SelectedDirectoryPathOrg ""
+	set NotifyRuntimeUser ""
 # Fill user name combo box.
 	set FileHandle [open "/etc/passwd" r]
 	ComboBoxNotifyRuntimeUserSettings delete list 0 end
+	ComboBoxNotifyRuntimeUserSettings insert list end ""
 	while {![eof $FileHandle]} {
 		gets $FileHandle userName
 		set userName [string range $userName 0 [expr [string first ":" $userName] -1]]
 		ComboBoxNotifyRuntimeUserSettings insert list end $userName
 	}
 	close $FileHandle
-# Set entry in combo box to notify run time user.
-	ComboBoxNotifyRuntimeUserSettings insert entry end $PPref(NotifyRuntimeUser)
 # Select User as the default process filter.
 	RadioButtonUserProcessSettings select
 # Get Directory list and fill scroll box
@@ -1902,6 +1851,9 @@ proc ::initSettings {} {
 # End Initialize Free Factory variables
 #############################################################################
 #############################################################################
+	ButtonUpdateDirectory configure -state disable
+	ButtonSaveDirectory configure -state disable
+
 	getSystemTimeSettings
 
 }
@@ -1923,7 +1875,7 @@ proc ::initEditSettings {} {
 
 ##########################
 # Free Factory Variables
-	global AppleDelay NumberOfFFProcesses FFProcessList SelectedDirectoryPath SelectedDirectoryPathOrg NotifyDirectoryList NumberOfDirectories NotifyRuntimeUser ShowProcess
+	global AppleDelay NumberOfFFProcesses FFProcessList SelectedDirectoryPath NotifyDirectoryList NumberOfDirectories NotifyRuntimeUser ScrollBoxItemPos ShowProcess
 
 	set PPrefTmp(color,window,fore) $PPref(color,window,fore)
 	set PPrefTmp(color,window,back) $PPref(color,window,back)
@@ -1957,7 +1909,6 @@ proc ::initEditSettings {} {
 	set PPrefTmp(ShowToolTips) $PPref(ShowToolTips)
 	set PPrefTmp(TheCompanyName) $PPref(TheCompanyName)
 	set PPrefTmp(AppleDelay) $PPref(AppleDelay)
-	set PPrefTmp(NotifyRuntimeUser) $PPref(NotifyRuntimeUser)
 	set PPrefRestore(color,window,fore) $PPref(color,window,fore)
 	set PPrefRestore(color,window,back) $PPref(color,window,back)
 	set PPrefRestore(color,active,fore) $PPref(color,active,fore)
@@ -1989,7 +1940,6 @@ proc ::initEditSettings {} {
 	set PPrefRestore(ShowToolTips) $PPref(ShowToolTips)
 	set PPrefRestore(TheCompanyName) $PPref(TheCompanyName)
 	set PPrefRestore(AppleDelay) $PPref(AppleDelay)
-	set PPrefRestore(NotifyRuntimeUser) $PPref(NotifyRuntimeUser)
 	set DateFormatVar $PPref(DisplayDateFormat)
 	set ShortLongSeparater $PPref(DateSeparater)
 	set TimeFormatVar $PPref(DisplayTimeFormat)
@@ -2111,7 +2061,7 @@ proc ::CheckForSettingsApplyEnable {} {
 	|| $PPrefTmp(SelectAllText) != $PPref(SelectAllText) || $PPrefTmp(ConfirmFileSaves) != $PPref(ConfirmFileSaves) || $PPrefTmp(ConfirmFileDeletions) != $PPref(ConfirmFileDeletions) \
 	|| $PPrefTmp(ShowToolTips) != $PPref(ShowToolTips)  || $PPref(DisplayDateFormat) != $PPrefTmp(DisplayDateFormat) || $PPref(DateSeparater) != $PPrefTmp(DateSeparater) \
 	|| $PPref(DisplayTimeFormat) != $PPrefTmp(DisplayTimeFormat) || $PPref(TimeSeparater) != $PPrefTmp(TimeSeparater) \
-	|| $PPref(TheCompanyName) != $PPrefTmp(TheCompanyName) || $PPref(AppleDelay) != $PPrefTmp(AppleDelay) || $PPref(NotifyRuntimeUser) != $PPrefTmp(NotifyRuntimeUser) \
+	|| $PPref(TheCompanyName) != $PPrefTmp(TheCompanyName) || $PPref(AppleDelay) != $PPrefTmp(AppleDelay) \
 	|| $PPref(DisplayDayOfWeek) != $PPrefTmp(DisplayDayOfWeek) || $PPref(PDFReaderPath) != $PPrefTmp(PDFReaderPath)} {
 		.settings.footerFrame.settingsApplyButton configure -state normal
 	} else {
@@ -2340,7 +2290,7 @@ proc parseFontSettingsLine {} {
 proc GetNumberOfFFProcesses {} {
 ##########################
 # Free Factory Variables
-	global AppleDelay NumberOfFFProcesses FFProcessList SelectedDirectoryPath SelectedDirectoryPathOrg NotifyDirectoryList NumberOfDirectories NotifyRuntimeUser ShowProcess
+	global AppleDelay NumberOfFFProcesses FFProcessList SelectedDirectoryPath NotifyDirectoryList NumberOfDirectories NotifyRuntimeUser ScrollBoxItemPos ShowProcess
 	global env
 
 # 1834 pts/2    00:00:00 inotifywait
@@ -2420,25 +2370,132 @@ proc GetNotifyDirectoryList {} {
 
 ##########################
 # Free Factory Variables
-	global AppleDelay NumberOfFFProcesses FFProcessList SelectedDirectoryPath SelectedDirectoryPathOrg NotifyDirectoryList NumberOfDirectories NotifyRuntimeUser ShowProcess
+	global AppleDelay NumberOfFFProcesses FFProcessList SelectedDirectoryPath NotifyDirectoryList NumberOfDirectories NotifyRuntimeUser ScrollBoxItemPos ShowProcess
 	global env
 
 	ScrolledListBoxFactoryNotifyDirectories delete 0 end
-	if {![file exists "/opt/FreeFactory/FreeFactoryNotifyDirectoryList"] || [file size "/opt/FreeFactory/FreeFactoryNotifyDirectoryList"] == 0} {
+	if {![file exists "/opt/FreeFactory/FreeFactoryNotifyDirectoryList"]} {
 		set FileHandle [open "/opt/FreeFactory/FreeFactoryNotifyDirectoryList" w]
-		puts $FileHandle "/opt/FreeFactory/NotifyVideo/"
-		puts $FileHandle "/opt/FreeFactory/NotifyVideo2/"
+		puts $FileHandle "/opt/FreeFactory/NotifyVideo/ {}"
+		puts $FileHandle "/opt/FreeFactory/NotifyVideo2/ {}"
 		close $FileHandle
 	}
 	set FileHandle [open "/opt/FreeFactory/FreeFactoryNotifyDirectoryList" r]
-	set NumberOfDirectories -1
+	set NumberOfDirectories 0
 	while {![eof $FileHandle]} {
 		gets $FileHandle NotifyDirectory
-		incr NumberOfDirectories
-		set NotifyDirectoryList($NumberOfDirectories) $NotifyDirectory
-		ScrolledListBoxFactoryNotifyDirectories insert end $NotifyDirectory
+		if {[string trim $NotifyDirectory] !=""} {
+			set NotifyDirectoryList($NumberOfDirectories) $NotifyDirectory
+			ScrolledListBoxFactoryNotifyDirectories insert end [lindex $NotifyDirectory 0]
+			incr NumberOfDirectories
+		}
 	}
 	close $FileHandle
 }
 ## End GetNotifyDirectoryList
 #############################################################################
+#############################################################################
+## Procedure: SaveDirectoryList
+proc SaveDirectoryList {} {
+	global SelectedDirectoryPath ScrollBoxItemPos NumberOfDirectories NotifyRuntimeUser NotifyDirectoryList
+# First check to make sure SelectedDirectoryPath variable
+# is not a null string or a string with only spaces.
+		if {[string trim $SelectedDirectoryPath] != ""} {
+# If notify directory path does not end in a slash then append it.
+			if {[expr [string last "/" [string trim $SelectedDirectoryPath]] + 1] < [string length [string trim $SelectedDirectoryPath]]} {
+				append SelectedDirectoryPath "/"
+			}
+			set FileHandle [open "/opt/FreeFactory/FreeFactoryNotifyDirectoryList" w]
+			set NotifyDirectoryList($NumberOfDirectories) [list [string trim $SelectedDirectoryPath] [string trim $NotifyRuntimeUser]]
+			incr NumberOfDirectories
+			for {set x 0} {$x < $NumberOfDirectories} {incr x} {
+# Then we over write
+				puts $FileHandle $NotifyDirectoryList($x)
+			}
+			close $FileHandle
+			set SelectedDirectoryPath ""
+			set NotifyRuntimeUser ""
+			ButtonSaveDirectory configure -state disable
+			GetNotifyDirectoryList
+		}
+}
+## End SaveDirectoryList
+#############################################################################
+#############################################################################
+## Procedure: UpdateDirectoryList
+proc UpdateDirectoryList {} {
+	global SelectedDirectoryPath ScrollBoxItemPos NumberOfDirectories NotifyRuntimeUser NotifyDirectoryList
+
+			if {[expr [string last "/" [string trim $SelectedDirectoryPath]] + 1] < [string length [string trim $SelectedDirectoryPath]]} {
+				append SelectedDirectoryPath "/"
+			}
+			set FileHandle [open "/opt/FreeFactory/FreeFactoryNotifyDirectoryList" w]
+			set NotifyDirectoryList($ScrollBoxItemPos) [list [string trim $SelectedDirectoryPath] [string trim $NotifyRuntimeUser]]
+			for {set x 0} {$x < $NumberOfDirectories} {incr x} {
+				puts $FileHandle $NotifyDirectoryList($x)
+			}
+			close $FileHandle
+			set SelectedDirectoryPath ""
+			set NotifyRuntimeUser ""
+			ButtonUpdateDirectory configure -state disable
+			GetNotifyDirectoryList
+}
+## End UpdateDirectoryList
+#############################################################################
+################################################################################
+################################################################################
+proc DeleteNotifyDirectory {} {
+	global PPref GenericConfirmName GenericConfirm NotifyDirectoryList ScrollBoxItemPos NumberOfDirectories SelectedDirectoryPath
+# First check to make sure SelectedDirectoryPath variable
+# is not a null string or a string with only spaces.
+	if {[string trim $SelectedDirectoryPath] != ""} {
+		if {$PPref(ConfirmFileDeletions) == "Yes"} {
+			set GenericConfirm 2
+			Window show .genericConfirm
+			widgetUpdate
+			set GenericConfirmName "Delete notify directory"
+			append GenericConfirmName "  $SelectedDirectoryPath  ?"
+			wm title .genericConfirm "Delete Directory Confirmation"
+			tkwait window .genericConfirm
+			if {$GenericConfirm == 1} {
+# Set selected directory variable to null
+				set NotifyDirectoryList($ScrollBoxItemPos) ""
+				set FileHandle [open "/opt/FreeFactory/FreeFactoryNotifyDirectoryList" w]
+				for {set x 0} {$x < $NumberOfDirectories} {incr x} {
+# Only write to the file if directory path not set to null
+					if {$NotifyDirectoryList($x) != ""} {
+						puts $FileHandle $NotifyDirectoryList($x)
+						set NotifyDirectoryList($x) ""
+					}
+				}
+				close $FileHandle
+				set SelectedDirectoryPath ""
+				set NotifyRuntimeUser ""
+				ButtonUpdateDirectory configure -state disable
+				GetNotifyDirectoryList
+			}
+		} else {
+
+# First check to make sure SelectedDirectoryPath variable
+# is not a null string or a string with only spaces.
+# Set selected directory variable to null
+			set NotifyDirectoryList($ScrollBoxItemPos) ""
+			set FileHandle [open "/opt/FreeFactory/FreeFactoryNotifyDirectoryList" w]
+			for {set x 0} {$x < $NumberOfDirectories} {incr x} {
+# Only write to the file if directory path not set to null
+				if {$NotifyDirectoryList($x) != ""} {
+					puts $FileHandle $NotifyDirectoryList($x)
+					set NotifyDirectoryList($x) ""
+				}
+			}
+			close $FileHandle
+			set SelectedDirectoryPath ""
+			set NotifyRuntimeUser ""
+			ButtonUpdateDirectory configure -state disable
+			GetNotifyDirectoryList
+		}
+	}
+}
+# End DeleteFactoryFile
+################################################################################
+################################################################################

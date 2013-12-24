@@ -19,7 +19,6 @@ FOUNDRYTEXT=adobe
 FONTTEXT=-family helvetica -size 8 -weight normal -slant roman -underline 0 -overstrike 0
 THECOMPANYNAME=WDTV
 APPLEDELAY=30
-NOTIFYRUNTIMEUSER=
 PDFREADERPATH=/opt/Adobe/Reader9/bin/acroread
 FOUNDRYTOOLTIP=adobe
 TOOLTIPFONTS=-family utopia -size 10 -weight bold -slant roman -underline 0 -overstrike 0

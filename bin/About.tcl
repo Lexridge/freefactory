@@ -129,8 +129,8 @@ global progTitle progVersion byText authorText copyrightText FreeFactoryInstalle
 	set progVersion "Version "
 	append progVersion $FreeFactoryInstalledVERSION
 	set byText "by"
-	set authorText "Jim Hines"
-	set copyrightText "Copyright 2008 GPLv3"
+	set authorText "Jim Hines and Karl Swisher"
+	set copyrightText "Copyright 2013 GPLv3"
 	widgetUpdate
 }
 # End initAbout

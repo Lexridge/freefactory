@@ -35,5 +35,5 @@
 #
 #
 #############################################################################
-inotifywait -rme close_write /video/dropbox | /opt/FreeFactory/bin/FreeFactoryNotify.sh&
+inotifywait -rme close_write /video/dropbox | /opt/FreeFactory/bin/FreeFactoryNotify.sh 2>> /var/log/FreeFactory/InotifyStartupUser.log&
 exit
