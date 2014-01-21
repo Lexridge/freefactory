@@ -39,16 +39,6 @@ LOG=/var/log/FreeFactory/FreeFactoryNotifyError.log
 # with the _ character.
 # LOG=`echo $LOG | sed  s/\ /_/g`
 ####################################################################################
-
-##################
-function if_error
-##################
-{
-	if [[ $? -ne 0 ]]; then 			# check return code passed to function
-		print "$1 TIME:$TIME" | tee -a $LOG 	# if rc > 0 then print error msg and quit
-		exit $?
-	fi
-}
 ####################################################################################
 #
 # Start Read FreeFactory.config
@@ -56,20 +46,20 @@ function if_error
 # This code here opens up /opt/FreeFactory/FreeFactory.config to find the Apple delay
 # variable and set the bash variable APPLEDELAY to that value.
 
-	APPLEDELAY=0
-	CONFIGLINES=`cat /opt/FreeFactory/FreeFactory.config`
-	for line in $CONFIGLINES ; do
+    APPLEDELAY=0
+    CONFIGLINES=`cat /opt/FreeFactory/FreeFactory.config`
+    for line in $CONFIGLINES ; do
 
 #  Find "APPLEDELAY=" in the config file
-		if [ "${line:0:11}" = "APPLEDELAY=" ]; then
+        if [ "${line:0:11}" = "APPLEDELAY=" ]; then
 # $line string is actually "APPLEDELAY=30"
 # Want to parse out the number 30 and set
 # the bash APPLEDELAY variable to that number.
 
 # Set variable to value
-		APPLEDELAY="${line:11:3}"
-	 	fi
-	done
+        APPLEDELAY="${line:11:3}"
+         fi
+    done
 #
 # End Read FreeFactory.config
 #
@@ -78,19 +68,36 @@ function if_error
 SOURCEPATH=
 NOTIFY_EVENT=
 FILENAME=
+LASTSOURCEPATH=
+LASTFILENAME=
+FILESIZE=0
+LASTFILESIZE=0
+####################################################################################
 # Set up continous loop.
 for (( ; ; ))
 do
+####################################################################################
 # Read variables piped in from inotifywait
-	read SOURCEPATH NOTIFY_EVENT FILENAME
+    read SOURCEPATH NOTIFY_EVENT FILENAME
+# Get file size to compare when the file is completely written.
+    FILESIZE=$(stat -c%s "$SOURCEPATH$FILENAME")
+# This loop repeats the above procedure until the file
+# size does not change.
+    while [ $FILESIZE -ne $LASTFILESIZE ]
+    do
+        LASTFILESIZE=$FILESIZE
+        FILESIZE=$(stat -c%s "$SOURCEPATH$FILENAME")
+        sleep 5
+    done
+####################################################################################
 # Write variables to the stdout which is screen
-	echo ""
-	echo "*****************************************************************************************"
-	echo "********************************* Report From *******************************************"
-	echo "***************************** FreeFactoryNotify.sh **************************************"
-	echo "============ Received the following variables from inotifywait"
-	echo "============ Directory path and filename $SOURCEPATH$FILENAME"
-	echo "============ Inotify Event   $NOTIFY_EVENT"
+    echo ""
+    echo "*****************************************************************************************"
+    echo "********************************* Report From *******************************************"
+    echo "***************************** FreeFactoryNotify.sh **************************************"
+    echo "============ Received the following variables from inotifywait"
+    echo "============ Directory path and filename $SOURCEPATH$FILENAME"
+    echo "============ Inotify Event   $NOTIFY_EVENT"
 ####################################################################################
 #
 # Start Apple work around.
@@ -112,31 +119,26 @@ do
 
 # variable and set the bash variable APPLEDELAY to that value.
 
+
+
+
+
 # Checking for dot files
- 	if [ "${FILENAME:0:1}" = "." ]; then
-# An Apple computer is writing to a notify directory.  Put this script
-# to sleep
-	echo "============ Apple Computer Writing Detected"
-	echo "             ***************************************************************"
-	echo "             * Putting FreeFactoryNotify.sh script to sleep.  Running sleep $APPLEDELAY command"
-		sleep $APPLEDELAY
-	echo "             * Wake up FreeFactoryNotify.sh script, running without delay."
-	echo "             ***************************************************************"
-	else
-		/opt/FreeFactory/bin/FreeFactoryConversion.tcl $SOURCEPATH $FILENAME 2>> $LOG &
-	echo "============ Running Free Fractory conversion script."
-	echo "============ Converting $SOURCEPATH$FILENAME"
-	echo "*****************************************************************************************"
-	echo "*****************************************************************************************"
-	fi
+ if [ "${FILENAME:0:1}" != "." ]; then
+        /opt/FreeFactory/bin/FreeFactoryConversion.tcl $SOURCEPATH $FILENAME 2>> $LOG &
+        echo "============ Running Free Fractory conversion script."
+        echo "============ Converting $SOURCEPATH$FILENAME"
+        echo "*****************************************************************************************"
+        echo "*****************************************************************************************"
+ fi 
 #
 # End Apple work around.
 #
 ####################################################################################
 # Clear variables to null value
-	SOURCEPATH=
-	NOTIFY_EVENT=
-	FILENAME=
+    SOURCEPATH=
+    NOTIFY_EVENT=
+    FILENAME=
 # ===== END ==========
 # End continous loop
 done
