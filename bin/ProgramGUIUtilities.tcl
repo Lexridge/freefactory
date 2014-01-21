@@ -1342,7 +1342,7 @@ proc vTclWindow.genericConfirm {base} {
 # This positions the window on the screen.  It uses the screen size information to determine
 # placement.
 	set xCord [expr int(($screenx-310)/2)]
-	set yCord [expr int(($screeny-60)/2)]
+	set yCord [expr int(($screeny-100)/2)]
 ############################################################################
 ############################################################################
 	if {$base == ""} {set base .genericConfirm}
@@ -1355,7 +1355,7 @@ proc vTclWindow.genericConfirm {base} {
 	wm focusmodel $top passive
 	wm geometry $top 310x100+$xCord+$yCord; update
 	wm maxsize $top 1265 994
-	wm minsize $top 500 60
+	wm minsize $top 310 100
 	wm overrideredirect $top 0
 	wm resizable $top 0 0
 	wm deiconify $top

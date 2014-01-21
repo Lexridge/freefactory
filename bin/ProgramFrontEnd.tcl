@@ -30,22 +30,34 @@
 #############################################################################
 proc vTclWindow.programFrontEnd {base} {
 ##########################
-# Free Factory variables
-	global FreeFactoryDataDirectoryPath FreeFactoryDataFileName SaveFilePath DeleteSource DeleteConversionLogs EnableFactory
-
-##########################
 # System Control variables
 	global PPref screenx screeny passconfig SystemTime FreeFactoryInstalledVERSION FreeFactoryInstallType WindowSizeX WindowSizeY FontSizeLabel FontSizeText
 	global SelectAllText ConfirmFileSaves ConfirmFileDeletions SettingsCancelConfirm
 	global ScaleWidth ProgressPercentComplete ProgressActionTitle ProgressDetailCount TotalRecords ProcessedRecords
 
 ##########################
-# Video and Audio variables
-	global FactoryDescription NotifyDirectoryEntry SelectedFactory OutputFileSuffixEntry ConversionProgram OutputDirectoryEntry
+# Free Factory variables
+	global DeleteSource DeleteConversionLogs EnableFactory
+	global FactoryDescription NotifyDirectoryEntry SelectedFactory OutputFileSuffixEntry FFMxProgram OutputDirectoryEntry
 	global FTPProgram FTPURLEntry FTPUserNameEntry FTPPasswordEntry FTPRemotePathEntry FTPTransferType FTPDeleteAfter
-	global VideoCodecs VideoWrapper VideoFrameRate VideoSize VideoTarget VideoTags Threads Aspect VideoBitRate VideoPreset VideoStreamID 
+	global RunFrom FactoryLinks FreeFactoryAction FactoryEnableEMail FactoryEMailNameEntry FactoryEMailAddressEntry FactoryEMailsName
+	global EnableFactoryLinking FactoryEMailsAddress FactoryEMailMessage GlobalEMailMessage
+
+	global DeleteSourceTmp DeleteConversionLogsTmp EnableFactoryTmp
+	global FactoryDescriptionTmp NotifyDirectoryEntryTmp SelectedFactoryTmp OutputFileSuffixEntryTmp FFMxProgramTmp OutputDirectoryEntryTmp
+	global FTPProgramTmp FTPURLEntryTmp FTPUserNameEntryTmp FTPPasswordEntryTmp FTPRemotePathEntryTmp FTPTransferTypeTmp FTPDeleteAfterTmp
+	global RunFromTmp FactoryLinksTmp FreeFactoryActionTmp FactoryEnableEMailTmp FactoryEMailNameEntryTmp FactoryEMailAddressEntryTmp FactoryEMailsNameTmp
+	global EnableFactoryLinkingTmp FactoryEMailsAddressTmp FactoryEMailMessageTmp
+
+##########################
+# Video and Audio variables
+	global VideoCodecs VideoWrapper VideoFrameRate VideoSize VideoTarget VideoTags Threads Aspect VideoBitRate VideoPreset VideoStreamID
 	global GroupPicSizeEntry BFramesEntry FrameStrategyEntry StartTimeOffsetEntry ForceFormat
 	global AudioCodecs AudioBitRate AudioSampleRate AudioTag AudioChannels AudioStreamID AudioFileExtension
+
+	global VideoCodecsTmp VideoWrapperTmp VideoFrameRateTmp VideoSizeTmp VideoTargetTmp VideoTagsTmp ThreadsTmp AspectTmp VideoBitRateTmp VideoPresetTmp VideoStreamIDTmp
+	global GroupPicSizeEntryTmp BFramesEntryTmp FrameStrategyEntryTmp StartTimeOffsetEntryTmp ForceFormatTmp
+	global AudioCodecsTmp AudioBitRateTmp AudioSampleRateTmp AudioTagTmp AudioChannelsTmp AudioStreamIDTmp AudioFileExtensionTmp
 
 ##########################
 # File Dialog variables
@@ -64,7 +76,7 @@ proc vTclWindow.programFrontEnd {base} {
 
 	global ProgressBarProgressMain ScaleWidthMain ProgressPercentCompleteMain
 	global ProgressDetailCountMain
-
+	global LogListPos LogListName LogList
 ##########################################################################################################################
 
 	set StartPos [string trim [expr [string first "-size " $PPref(fonts,label)] + 6]]
@@ -84,7 +96,7 @@ proc vTclWindow.programFrontEnd {base} {
 ##########################################################################################################################
 # This positions the window on the screen.  It uses the screen size information to determine
 # placement.
-	set xCord [expr int(($screenx-850)/2)]
+	set xCord [expr int(($screenx-950)/2)]
 	set yCord [expr int(($screeny-550)/2)]
 ##########################################################################################################################
 ##########################################################################################################################
@@ -98,9 +110,9 @@ proc vTclWindow.programFrontEnd {base} {
         -background #86888a -highlightbackground #e6e6e6 \
         -highlightcolor #000000 -menu "$top.m01"
     wm focusmodel $top passive
-    wm geometry $top 850x550+$xCord+$yCord; update
-    wm maxsize $top 850 550
-    wm minsize $top 850 550
+    wm geometry $top 950x550+$xCord+$yCord; update
+    wm maxsize $top 950 550
+    wm minsize $top 950 550
     wm overrideredirect $top 0
     wm resizable $top 0 0
     wm deiconify $top
@@ -110,7 +122,7 @@ proc vTclWindow.programFrontEnd {base} {
     vTcl:FireEvent $top <<Create>>
     wm protocol $top WM_DELETE_WINDOW "vTcl:FireEvent $top <<DeleteWindow>>"
 
-#    bind $top <ButtonRelease-3> {tk_messageBox -message %W}
+    bind $top <ButtonRelease-3> {tk_messageBox -message %W}
 
     bind $top <Escape> {exit}
     bind $top <Control-n> {ButtonNew invoke}
@@ -121,6 +133,7 @@ proc vTclWindow.programFrontEnd {base} {
     bind $top <Control-D> {ButtonDelete invoke}
     bind $top <Control-h> {ButtonHelp invoke}
     bind $top <Control-H> {ButtonHelp invoke}
+    bind $top <F1> {ButtonHelp invoke}
 
 	menu $top.m01 -borderwidth 1 -relief raised -cursor {}
 	vTcl:DefineAlias "$top.m01" "MenuMasterProgramFrontEnd" vTcl:WidgetProc "Toplevel1" 1
@@ -156,6 +169,19 @@ proc vTclWindow.programFrontEnd {base} {
 
 	$site_3_0.men01 add command -command {DeleteFactoryFile} -label "Delete"
 	$site_3_0.men01 add command -command {exit} -label "Exit"
+
+	$site_3_0 add cascade -menu "$site_3_0.men03" -label "View"
+	vTcl:DefineAlias "$site_3_0.men03" "Menu3ProgramFrontEnd" vTcl:WidgetProc "Toplevel1" 1
+
+	menu $site_3_0.men03 -tearoff 0
+	$site_3_0.men03 add command -command {
+		source "/opt/FreeFactory/bin/FreeFactoryViewLogs.tcl"
+		Window show .freeFactoryViewLogs
+		Window show .freeFactoryViewLogs
+		widgetUpdate
+		InitFreeFactoryViewLogs
+#		FillLogList
+	} -label "View Logs"
 
 	$site_3_0 add cascade -menu "$site_3_0.men07" -label "Settings"
 	vTcl:DefineAlias "$site_3_0.men07" "Menu7ProgramFrontEnd" vTcl:WidgetProc "Toplevel1" 1
@@ -272,6 +298,18 @@ proc vTclWindow.programFrontEnd {base} {
 
 	set site_4_4 $site_3_0.frameButtonGroup5
 
+	button $site_4_4.viewLogsButton -borderwidth 0 -highlightthickness 0 -image [vTcl:image:get_image [file join / opt FreeFactory Pics log4-32x32.gif]] \
+	-command {
+		source "/opt/FreeFactory/bin/FreeFactoryViewLogs.tcl"
+		Window show .freeFactoryViewLogs
+		Window show .freeFactoryViewLogs
+		widgetUpdate
+		FillLogList
+	} -text ""
+	vTcl:DefineAlias "$site_4_4.viewLogsButton" "ButtonViewLogsFactorySelection" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_4_4.viewLogsButton -in $site_4_4 -anchor nw -expand 0 -fill none -side left
+	balloon $site_4_4.viewLogsButton "View Logs"
+
 	button $site_4_4.editSettingsButton -borderwidth 0 -image [vTcl:image:get_image [file join / opt FreeFactory Pics ksysguard32x32.gif]] \
 	-command {
 		set SettingsCancelConfirm ""
@@ -371,15 +409,15 @@ proc vTclWindow.programFrontEnd {base} {
 
 	set site_3_1 $site_3_0.factorySelectionListBoxLedgendFrame
 
-	label $site_3_1.readOnlyFactorysLabel -text "Read Only" -background $PPref(color,widget,back) -foreground #ff0000 -border 0 -relief sunken
+	label $site_3_1.readOnlyFactorysLabel -text "Read Only" -background $PPref(color,widget,back) -foreground #ff0000 -border 1 -relief sunken
 	vTcl:DefineAlias "$site_3_1.readOnlyFactorysLabel" "LabelReadOnlyFactorySelection" vTcl:WidgetProc "Toplevel1" 1
 	pack $site_3_1.readOnlyFactorysLabel -in $site_3_1 -anchor w -expand 0 -fill none -side left
 
-	label $site_3_1.disableFactorysLabel -text "Disabled" -background #cccccc -foreground #0000ff -border 0 -relief sunken
+	label $site_3_1.disableFactorysLabel -text "Disabled" -background #efefef -foreground #0000ff -border 1 -relief sunken
 	vTcl:DefineAlias "$site_3_1.disableFactorysLabel" "LabelDisabledFactorySelection" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_3_1.disableFactorysLabel -in $site_3_1 -anchor w -expand 1 -fill x -side left
+	pack $site_3_1.disableFactorysLabel -in $site_3_1 -anchor center -expand 1 -fill none -side left
 
-	label $site_3_1.readWriteFactorysLabel -text "Read Write" -background $PPref(color,widget,back) -foreground #0000ff -border 0 -relief sunken
+	label $site_3_1.readWriteFactorysLabel -text "Read Write" -background $PPref(color,widget,back) -foreground #0000ff -border 1 -relief sunken
 	vTcl:DefineAlias "$site_3_1.readWriteFactorysLabel" "LabelReadWriteFactorySelection" vTcl:WidgetProc "Toplevel1" 1
 	pack $site_3_1.readWriteFactorysLabel -in $site_3_1 -anchor e -expand 0 -fill none -side right
 
@@ -393,59 +431,230 @@ proc vTclWindow.programFrontEnd {base} {
 	-sbwidth 10 -selectbackground #c4c4c4 -selectborderwidth 1 -selectforeground black -state normal \
 	-textbackground #d9d9d9 -troughcolor #c4c4c4 -vscrollmode dynamic -dblclickcommand {} -selectioncommand {
 # Set the SelectedFactory variable to the factory in the list box.
-		InitVariables
-		set SelectedFactory [ScrolledListBoxFactoryFilesFactorySelection get [ScrolledListBoxFactoryFilesFactorySelection curselection ]]
-		set FileHandle [open "/opt/FreeFactory/Factories/$SelectedFactory" r]
-		while {![eof $FileHandle]} {
-			gets $FileHandle FactoryVar
-			set EqualDelimiter [string first "=" $FactoryVar]
-			if {$EqualDelimiter>0 && [string first "#" [string trim $FactoryVar]]!=0} {
-				set FactoryField [string trim [string range $FactoryVar 0 [expr $EqualDelimiter - 1]]]
-				set FactoryValue [string trim [string range $FactoryVar [expr $EqualDelimiter + 1] end]]
-				switch $FactoryField {
-					"FACTORYDESCRIPTION" {set FactoryDescription $FactoryValue}
-					"NOTIFYDIRECTORY" {set NotifyDirectoryEntry $FactoryValue}
-					"OUTPUTDIRECTORY" {set OutputDirectoryEntry $FactoryValue}
-					"OUTPUTFILESUFFIX" {set OutputFileSuffixEntry $FactoryValue}
-					"CONVERSIONPROGRAM" {set ConversionProgram $FactoryValue}
-					"FTPPROGRAM" {set FTPProgram $FactoryValue}
-					"FTPURL" {set FTPURLEntry $FactoryValue}
-					"FTPUSERNAME" {set FTPUserNameEntry $FactoryValue}
-					"FTPPASSWORD" {set FTPPasswordEntry $FactoryValue}
-					"FTPREMOTEPATH" {set FTPRemotePathEntry $FactoryValue}
-					"FTPTRANSFERTYPE" {set FTPTransferType $FactoryValue}
-					"FTPDELETEAFTER" {set FTPDeleteAfter $FactoryValue}
-					"VIDEOCODECS" {set VideoCodecs $FactoryValue}
-					"VIDEOWRAPPER" {set VideoWrapper $FactoryValue}
-					"VIDEOFRAMERATE" {set VideoFrameRate $FactoryValue}
-					"VIDEOSIZE" {set VideoSize $FactoryValue}
-					"VIDEOTARGET" {set VideoTarget $FactoryValue}
-					"VIDEOTAGS" {set VideoTags $FactoryValue}
-					"THREADS" {set Threads $FactoryValue}
-					"ASPECT" {set Aspect $FactoryValue}
-					"VIDEOBITRATE" {set VideoBitRate $FactoryValue}
-					"VIDEOPRESET" {set VideoPreset $FactoryValue}
-					"VIDEOSTREAMID" {set VideoStreamID $FactoryValue}
-					"GROUPPICSIZE" {set GroupPicSizeEntry $FactoryValue}
-					"BFRAMES" {set BFramesEntry $FactoryValue}
-					"FRAMESTRATEGY" {set FrameStrategyEntry $FactoryValue}
-					"FORCEFORMAT" {set ForceFormat $FactoryValue}
-					"STARTTIMEOFFSET" {set StartTimeOffsetEntry $FactoryValue}
-					"AUDIOCODECS" {set AudioCodecs $FactoryValue}
-					"AUDIOBITRATE" {set AudioBitRate $FactoryValue}
-					"AUDIOSAMPLERATE" {set AudioSampleRate $FactoryValue}
-					"AUDIOFILEEXTENSION" {set AudioFileExtension $FactoryValue}
-					"AUDIOTAG" {set AudioTag $FactoryValue}
-					"AUDIOCHANNELS" {set AudioChannels $FactoryValue}
-					"AUDIOSTREAMID" {set AudioStreamID $FactoryValue}
-					"DELETESOURCE" {set DeleteSource $FactoryValue}
-					"DELETECONVERSIONLOGS" {set DeleteConversionLogs $FactoryValue}
-					"ENABLEFACTORY" {set EnableFactory $FactoryValue}
+		set SelectedFactoryTmp2 [ScrolledListBoxFactoryFilesFactorySelection get [ScrolledListBoxFactoryFilesFactorySelection curselection ]]
+# This first condition statement is a hack.  For some reason when
+# the program is first run and the first click is made on a factory
+# the checking condition statement returned a false positive meaning
+# somehow one of the variables got changed.  Unable to track in down
+# at present ant this is a fix.
+		if {$SelectedFactoryTmp != "" && $SelectedFactoryTmp2 != $SelectedFactory} {
+# Before switching factories check to see if anything has changed and
+# prompt to save before switching.
+			if {$FactoryDescriptionTmp != $FactoryDescription || $NotifyDirectoryEntryTmp != $NotifyDirectoryEntry || $OutputDirectoryEntryTmp != $OutputDirectoryEntry \
+			|| $OutputFileSuffixEntryTmp != $OutputFileSuffixEntry || $FFMxProgramTmp != $FFMxProgram || $RunFromTmp != $RunFrom \
+			|| $FTPProgramTmp != $FTPProgram || $FTPURLEntryTmp != $FTPURLEntry || $FTPUserNameEntryTmp != $FTPUserNameEntry \
+			|| $FTPPasswordEntryTmp != $FTPPasswordEntry || $FTPRemotePathEntryTmp != $FTPRemotePathEntry || $FTPTransferTypeTmp != $FTPTransferType \
+			|| $FTPDeleteAfterTmp != $FTPDeleteAfter || $VideoCodecsTmp != $VideoCodecs || $VideoWrapperTmp != $VideoWrapper \
+			|| $VideoFrameRateTmp != $VideoFrameRate || $VideoSizeTmp != $VideoSize || $VideoTargetTmp != $VideoTarget \
+			|| $VideoTagsTmp != $VideoTags || $ThreadsTmp != $Threads || $AspectTmp != $Aspect \
+			|| $VideoBitRateTmp != $VideoBitRate || $VideoPresetTmp != $VideoPreset || $VideoStreamIDTmp != $VideoStreamID \
+			|| $GroupPicSizeEntryTmp != $GroupPicSizeEntry	|| $BFramesEntryTmp != $BFramesEntry || $FrameStrategyEntryTmp != $FrameStrategyEntry \
+			|| $ForceFormatTmp != $ForceFormat || $StartTimeOffsetEntryTmp != $StartTimeOffsetEntry || $AudioCodecsTmp != $AudioCodecs \
+			|| $AudioBitRateTmp != $AudioBitRate || $AudioSampleRateTmp != $AudioSampleRate || $AudioFileExtensionTmp != $AudioFileExtension \
+			|| $AudioTagTmp != $AudioTag || $AudioChannelsTmp != $AudioChannels || $AudioStreamIDTmp != $AudioStreamID \
+			|| $DeleteSourceTmp != $DeleteSource || $DeleteConversionLogsTmp != $DeleteConversionLogs || $EnableFactoryTmp != $EnableFactory \
+			|| $FreeFactoryActionTmp != $FreeFactoryAction || $FactoryLinksTmp != $FactoryLinks || $FactoryEnableEMailTmp != $FactoryEnableEMail \
+			|| $FactoryEMailsNameTmp != $FactoryEMailsName || $FactoryEMailsAddressTmp != $FactoryEMailsAddress || $FactoryEMailMessageTmp != $FactoryEMailMessage \
+			|| $EnableFactoryLinkingTmp != $EnableFactoryLinking} {
+				set GenericConfirm 2
+				Window show .genericConfirm
+				widgetUpdate
+				set GenericConfirmName "This factory has changed. Save\nfactory file before loading new ?"
+				wm title .genericConfirm "Save Factory Confirmation"
+				tkwait window .genericConfirm
+				if {$GenericConfirm == 1} {
+					SaveFactoryFile
+				} else {
+					if {[file exists "/opt/FreeFactory/Factories/$SelectedFactory-Message"]} {
+						file delete -force "/opt/FreeFactory/Factories/$SelectedFactory-Message"
+					}
 				}
 			}
 		}
-		close $FileHandle
-	} -width 254
+# Now set the variables and switch to the new factory
+		if {$SelectedFactoryTmp2 != $SelectedFactory} {
+			set SelectedFactory $SelectedFactoryTmp2
+			set SelectedFactoryTmp $SelectedFactory
+			InitVariables
+			ButtonAddLink configure -state disable
+			ButtonRemoveLink configure -state disable
+			ButtonAddEMail configure -state disable
+			ButtonUpdateEMail configure -state disable
+			ButtonRemoveEMail configure -state disable
+			set FileHandle [open "/opt/FreeFactory/Factories/$SelectedFactory" r]
+			while {![eof $FileHandle]} {
+				gets $FileHandle FactoryVar
+				set EqualDelimiter [string first "=" $FactoryVar]
+				if {$EqualDelimiter>0 && [string first "#" [string trim $FactoryVar]]!=0} {
+					set FactoryField [string trim [string range $FactoryVar 0 [expr $EqualDelimiter - 1]]]
+					set FactoryValue [string trim [string range $FactoryVar [expr $EqualDelimiter + 1] end]]
+					switch $FactoryField {
+						"FACTORYDESCRIPTION" {set FactoryDescription $FactoryValue}
+						"NOTIFYDIRECTORY" {set NotifyDirectoryEntry $FactoryValue}
+						"OUTPUTDIRECTORY" {set OutputDirectoryEntry $FactoryValue}
+						"OUTPUTFILESUFFIX" {set OutputFileSuffixEntry $FactoryValue}
+						"FFMXPROGRAM" {set FFMxProgram $FactoryValue}
+						"RUNFROM" {set RunFrom $FactoryValue}
+						"FTPPROGRAM" {set FTPProgram $FactoryValue}
+						"FTPURL" {set FTPURLEntry $FactoryValue}
+						"FTPUSERNAME" {set FTPUserNameEntry $FactoryValue}
+						"FTPPASSWORD" {
+							set FTPPasswordEntry $FactoryValue
+# This will decode the FTP password variable
+#						set PasswordChars [string length $FactoryValue]
+#						set DecodedPassword ""
+#						for {set x 0} {$x < $PasswordChars} {incr x} {
+#							set DecodedChar  [format %c [expr [scan [string index $FactoryValue $x] %c] - 128]]
+#							append DecodedPassword $DecodedChar
+#						}
+#						set FTPPasswordEntry $DecodedPassword
+						}
+						"FTPREMOTEPATH" {set FTPRemotePathEntry $FactoryValue}
+						"FTPTRANSFERTYPE" {set FTPTransferType $FactoryValue}
+						"FTPDELETEAFTER" {set FTPDeleteAfter $FactoryValue}
+						"VIDEOCODECS" {set VideoCodecs $FactoryValue}
+						"VIDEOWRAPPER" {set VideoWrapper $FactoryValue}
+						"VIDEOFRAMERATE" {set VideoFrameRate $FactoryValue}
+						"VIDEOSIZE" {set VideoSize $FactoryValue}
+						"VIDEOTARGET" {set VideoTarget $FactoryValue}
+						"VIDEOTAGS" {set VideoTags $FactoryValue}
+						"THREADS" {set Threads $FactoryValue}
+						"ASPECT" {set Aspect $FactoryValue}
+						"VIDEOBITRATE" {set VideoBitRate $FactoryValue}
+						"VIDEOPRESET" {set VideoPreset $FactoryValue}
+						"VIDEOSTREAMID" {set VideoStreamID $FactoryValue}
+						"GROUPPICSIZE" {set GroupPicSizeEntry $FactoryValue}
+						"BFRAMES" {set BFramesEntry $FactoryValue}
+						"FRAMESTRATEGY" {set FrameStrategyEntry $FactoryValue}
+						"FORCEFORMAT" {set ForceFormat $FactoryValue}
+						"STARTTIMEOFFSET" {set StartTimeOffsetEntry $FactoryValue}
+						"AUDIOCODECS" {set AudioCodecs $FactoryValue}
+						"AUDIOBITRATE" {set AudioBitRate $FactoryValue}
+						"AUDIOSAMPLERATE" {set AudioSampleRate $FactoryValue}
+						"AUDIOFILEEXTENSION" {set AudioFileExtension $FactoryValue}
+						"AUDIOTAG" {set AudioTag $FactoryValue}
+						"AUDIOCHANNELS" {set AudioChannels $FactoryValue}
+						"AUDIOSTREAMID" {set AudioStreamID $FactoryValue}
+						"DELETESOURCE" {set DeleteSource $FactoryValue}
+						"DELETECONVERSIONLOGS" {set DeleteConversionLogs $FactoryValue}
+						"ENABLEFACTORY" {set EnableFactory $FactoryValue}
+						"FREEFRACTORYACTION" {set FreeFactoryAction $FactoryValue}
+						"ENABLEFACTORYLINKING" {set EnableFactoryLinking $FactoryValue}
+						"FACTORYLINKS" {set FactoryLinks $FactoryValue}
+						"FACTORYENABLEEMAIL" {set FactoryEnableEMail $FactoryValue}
+						"FACTORYEMAILNAME" {set FactoryEMailsName $FactoryValue}
+						"FACTORYEMAILADDRESS" {set FactoryEMailsAddress $FactoryValue}
+						"FACTORYEMAILMESSAGESTART" {
+							set FactoryEMailMessage ""
+							while {![eof $FileHandle] && $FactoryValue !="FACTORYEMAILMESSAGEEND"} {
+								gets $FileHandle FactoryValue
+								if {$FactoryValue != "FACTORYEMAILMESSAGEEND"} {
+									append FactoryEMailMessage $FactoryValue\n
+	
+								}
+							}
+						}
+					}
+				}
+			}
+			close $FileHandle
+
+			set FactoryDescriptionTmp $FactoryDescription
+			set NotifyDirectoryEntryTmp $NotifyDirectoryEntry
+			set OutputDirectoryEntryTmp $OutputDirectoryEntry
+			set OutputFileSuffixEntryTmp $OutputFileSuffixEntry
+			set FFMxProgramTmp $FFMxProgram
+			set RunFromTmp $RunFrom
+			set FTPProgramTmp $FTPProgram
+			set FTPURLEntryTmp $FTPURLEntry
+			set FTPUserNameEntryTmp $FTPUserNameEntry
+			set FTPPasswordEntryTmp $FTPPasswordEntry
+			set FTPRemotePathEntryTmp $FTPRemotePathEntry
+			set FTPTransferTypeTmp $FTPTransferType
+			set FTPDeleteAfterTmp $FTPDeleteAfter
+			set VideoCodecsTmp $VideoCodecs
+			set VideoWrapperTmp $VideoWrapper
+			set VideoFrameRateTmp $VideoFrameRate
+			set VideoSizeTmp $VideoSize
+			set VideoTargetTmp $VideoTarget
+			set VideoTagsTmp $VideoTags
+			set ThreadsTmp $Threads
+			set AspectTmp $Aspect
+			set VideoBitRateTmp $VideoBitRate
+			set VideoPresetTmp $VideoPreset
+			set VideoStreamIDTmp $VideoStreamID
+			set GroupPicSizeEntryTmp $GroupPicSizeEntry
+			set BFramesEntryTmp $BFramesEntry
+			set FrameStrategyEntryTmp $FrameStrategyEntry
+			set ForceFormatTmp $ForceFormat
+			set StartTimeOffsetEntryTmp $StartTimeOffsetEntry
+			set AudioCodecsTmp $AudioCodecs
+			set AudioBitRateTmp $AudioBitRate
+			set AudioSampleRateTmp $AudioSampleRate
+			set AudioFileExtensionTmp $AudioFileExtension
+			set AudioTagTmp $AudioTag
+			set AudioChannelsTmp $AudioChannels
+			set AudioStreamIDTmp $AudioStreamID
+			set DeleteSourceTmp $DeleteSource
+			set DeleteConversionLogsTmp $DeleteConversionLogs
+			set EnableFactoryTmp $EnableFactory
+			set FreeFactoryActionTmp $FreeFactoryAction
+			set EnableFactoryLinkingTmp $EnableFactoryLinking
+			set FactoryLinksTmp $FactoryLinks
+			set FactoryEnableEMailTmp $FactoryEnableEMail
+			set FactoryEMailsNameTmp $FactoryEMailsName
+			set FactoryEMailsAddressTmp $FactoryEMailsAddress
+			set FactoryEMailMessageTmp $FactoryEMailMessage
+# Load the list box with factory emails.
+			ScrolledListBoxFactoryEMail delete 0 end
+			set ListLength [llength $FactoryEMailsName]
+			for {set x 0} {$x < $ListLength} {incr x} {
+				ScrolledListBoxFactoryEMail insert end [lindex $FactoryEMailsName $x]
+			}
+			set FactoryEMailNameEntry ""
+			set FactoryEMailAddressEntry ""
+			ButtonAddEMail configure -state disable
+# Load combo box with linked factories.
+			ComboBoxLinkedFactory clear
+			ComboBoxLinkedFactory insert list end ""
+			ScrolledListBoxFactoryLinking delete 0 end
+			set ListLength [llength $FactoryLinks]
+			foreach item [lsort [glob -nocomplain /opt/FreeFactory/Factories/*]] {
+# Also check to see if factory already linked.
+				set Linked "Ok"
+				for {set x 0} {$x < $ListLength} {incr x} {
+					if {[file tail $item] == [lindex $FactoryLinks $x]} {
+						set Linked "No"
+						break
+					}
+				}
+# If factory not already linked and the factory in not itself then add to the combo box.
+				if {$SelectedFactory != [file tail $item] && $Linked == "Ok"} {
+					ComboBoxLinkedFactory insert list end [file tail $item]
+				}
+			}
+# Load the list box with linked factories.
+			ScrolledListBoxFactoryLinking delete 0 end
+			for {set x 0} {$x < $ListLength} {incr x} {
+				ScrolledListBoxFactoryLinking insert end [lindex $FactoryLinks $x]
+				set FileHandle [open "/opt/FreeFactory/Factories/[lindex $FactoryLinks $x]" r]
+				while {![eof $FileHandle]} {
+					gets $FileHandle FactoryVar
+					set EqualDelimiter [string first "=" $FactoryVar]
+					if {$EqualDelimiter>0 && [string first "#" [string trim $FactoryVar]]!=0} {
+						set FactoryField [string trim [string range $FactoryVar 0 [expr $EqualDelimiter - 1]]]
+						set FactoryValue [string trim [string range $FactoryVar [expr $EqualDelimiter + 1] end]]
+						if {$FactoryField == "ENABLEFACTORY"} {
+							if {$FactoryValue != "Yes"} {
+								ScrolledListBoxFactoryLinking itemconfigure end -background #efefef
+							}
+						}
+					}
+				}
+				close $FileHandle
+			}
+		}
+	} -width 200
 	vTcl:DefineAlias "$site_4_0.factoryFilesDirectoryListBox" "ScrolledListBoxFactoryFilesFactorySelection" vTcl:WidgetProc "Toplevel1" 1
 	pack $site_4_0.factoryFilesDirectoryListBox -in $site_4_0 -anchor n -expand 1 -fill both -side top
 
@@ -506,35 +715,41 @@ proc vTclWindow.programFrontEnd {base} {
 
 	set site_5_0 $site_1_0.middleFrame
 
-	frame $site_5_0.rightFrame -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
+	frame $site_5_0.rightFrame -relief flat -height 50 -width 100 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
 	vTcl:DefineAlias "$site_5_0.rightFrame" "FrameRight" vTcl:WidgetProc "Toplevel1" 1
 
-	::iwidgets::entryfield $site_5_0.factoryDescriptionEntry -width 35 -labeltext "Factory Description"  -textvariable FactoryDescription -relief sunken -justify left
-	vTcl:DefineAlias "$site_5_0.factoryDescriptionEntry" "FactoryDescriptionEntry" vTcl:WidgetProc "Toplevel1" 1
-	set BindWidget "$site_5_0.factoryDescriptionEntry"
-	set BindWidgetEntry "$site_5_0.factoryDescriptionEntry.lwchildsite.entry"
+	set site_5_1 $site_5_0.rightFrame
+
+	::iwidgets::labeledframe $site_5_1.factoryOptionsFrame -labelpos nw -labeltext "Factory Options"
+	vTcl:DefineAlias "$site_5_1.factoryOptionsFrame" "LabeledFrameFactoryOptions" vTcl:WidgetProc "Toplevel1" 1
+
+	set site_5_2 [$site_5_1.factoryOptionsFrame childsite]
+
+	::iwidgets::entryfield $site_5_2.factoryDescriptionEntry -width 35 -labeltext "Description"  -textvariable FactoryDescription -relief sunken -justify left
+	vTcl:DefineAlias "$site_5_2.factoryDescriptionEntry" "FactoryDescriptionEntry" vTcl:WidgetProc "Toplevel1" 1
+	set BindWidget "$site_5_2.factoryDescriptionEntry"
+	set BindWidgetEntry "$site_5_2.factoryDescriptionEntry.lwchildsite.entry"
 	vTcl:DefineAlias "$BindWidgetEntry" "EntryFactoryDescriptionChild" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_5_0.factoryDescriptionEntry -in $site_5_0 -anchor nw -expand 0 -fill x -side top
+	pack $site_5_2.factoryDescriptionEntry -in $site_5_2 -anchor nw -expand 0 -fill x -side top
 	bind $BindWidgetEntry <FocusIn> {
 		if {$PPref(SelectAllText) == "Yes"} {EntryFactoryDescriptionChild select range 0 end}
 		EntryFactoryDescriptionChild icursor end
 	}
-	set site_5_1 $site_5_0.rightFrame
         bind $BindWidgetEntry <Key-Return> {focus .programFrontEnd.middleFrame.rightFrame.notifyDirectoryFrame.notifyDirectoryEntry.lwchildsite.entry}
         bind $BindWidgetEntry <Key-KP_Enter> {focus .programFrontEnd.middleFrame.rightFrame.notifyDirectoryFrame.notifyDirectoryEntry.lwchildsite.entry}
 
-	frame $site_5_1.notifyDirectoryFrame -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
-	vTcl:DefineAlias "$site_5_1.notifyDirectoryFrame" "FrameNotifyDirectory" vTcl:WidgetProc "Toplevel1" 1
+	frame $site_5_2.notifyDirectoryFrame -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
+	vTcl:DefineAlias "$site_5_2.notifyDirectoryFrame" "FrameNotifyDirectory" vTcl:WidgetProc "Toplevel1" 1
 
-	set site_5_1_0 $site_5_1.notifyDirectoryFrame
+	set site_5_2_0 $site_5_2.notifyDirectoryFrame
 
-	::iwidgets::combobox $site_5_1_0.notifyDirectoryComboBoxFactorySelection -labeltext "Notify Directory" -labelpos w \
+	::iwidgets::combobox $site_5_2_0.notifyDirectoryComboBoxFactorySelection -labeltext "Notify Directory" -labelpos w \
         -highlightthickness 0 -command {} -width 12 -listheight 100 -justify left -selectioncommand {
 	} -textvariable NotifyDirectoryEntry -justify left
-	vTcl:DefineAlias "$site_5_1_0.notifyDirectoryComboBoxFactorySelection" "ComboBoxNotifyDirectoryFactorySelection" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_5_1_0.notifyDirectoryComboBoxFactorySelection -in $site_5_1_0 -anchor w -expand 1 -fill x -side left
+	vTcl:DefineAlias "$site_5_2_0.notifyDirectoryComboBoxFactorySelection" "ComboBoxNotifyDirectoryFactorySelection" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_2_0.notifyDirectoryComboBoxFactorySelection -in $site_5_2_0 -anchor w -expand 1 -fill x -side left
 
-	button $site_5_1_0.getNotifyDirectoryButton \
+	button $site_5_2_0.getNotifyDirectoryButton \
 	-activebackground #f9f9f9 -activeforeground black \
 	-command {
 		source "/opt/FreeFactory/bin/DirectoryDialog.tcl"
@@ -559,13 +774,11 @@ proc vTclWindow.programFrontEnd {base} {
 		}	
 
 	} -foreground black -highlightcolor black -image [vTcl:image:get_image [file join / opt FreeFactory Pics open.gif]] -text ""
-	vTcl:DefineAlias "$site_5_1_0.getNotifyDirectoryButton" "ButtonGetNotifyDirectorySelection" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_5_1_0.getNotifyDirectoryButton -in $site_5_1_0 -anchor ne -expand 0 -fill none -side right
-	balloon $site_5_1_0.getNotifyDirectoryButton "Browse"
+	vTcl:DefineAlias "$site_5_2_0.getNotifyDirectoryButton" "ButtonGetNotifyDirectorySelection" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_2_0.getNotifyDirectoryButton -in $site_5_2_0 -anchor ne -expand 0 -fill none -side right
+	balloon $site_5_2_0.getNotifyDirectoryButton "Browse"
 
-	pack $site_5_1.notifyDirectoryFrame -in $site_5_1 -anchor w -expand 0 -fill x -side top
-
-	set site_5_2 $site_5_0.rightFrame
+	pack $site_5_2.notifyDirectoryFrame -in $site_5_2 -anchor w -expand 0 -fill x -side top
 
 	frame $site_5_2.outputDirectoryFrame -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
 	vTcl:DefineAlias "$site_5_2.outputDirectoryFrame" "FrameOutputDirectory" vTcl:WidgetProc "Toplevel1" 1
@@ -618,37 +831,84 @@ proc vTclWindow.programFrontEnd {base} {
 	pack $site_5_2_0.getOutputDirectoryButton -in $site_5_2_0 -anchor ne -expand 0 -fill none -side right
 	balloon $site_5_2_0.getOutputDirectoryButton "Browse"
 
-	pack $site_5_2.outputDirectoryFrame -in $site_5_1 -anchor w -expand 0 -fill x -side top
+	pack $site_5_2.outputDirectoryFrame -in $site_5_2 -anchor w -expand 0 -fill x -side top
 
+	frame $site_5_2.outputFileSuffixFrame -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
+	vTcl:DefineAlias "$site_5_2.outputFileSuffixFrame" "FrameOutputFileSuffix" vTcl:WidgetProc "Toplevel1" 1
 
-	frame $site_5_1.outputFileSuffixFrame -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
-	vTcl:DefineAlias "$site_5_1.outputFileSuffixFrame" "FrameOutputFileSuffix" vTcl:WidgetProc "Toplevel1" 1
+	set site_5_3_0 $site_5_2.outputFileSuffixFrame
 
-	set site_5_3_0 $site_5_1.outputFileSuffixFrame
-
-	::iwidgets::entryfield $site_5_3_0.outputFileSuffixEntry -width 15 -labeltext "Output File Suffix"  -textvariable OutputFileSuffixEntry -relief sunken -justify left
+	::iwidgets::entryfield $site_5_3_0.outputFileSuffixEntry -width 13 -labeltext "Output File Suffix"  -textvariable OutputFileSuffixEntry -relief sunken -justify left
+	pack $site_5_3_0.outputFileSuffixEntry -in $site_5_3_0 -anchor nw -expand 0 -fill none -side left
 	vTcl:DefineAlias "$site_5_3_0.outputFileSuffixEntry" "OutputFileSuffixEntry" vTcl:WidgetProc "Toplevel1" 1
 	set BindWidget "$site_5_3_0.outputFileSuffixEntry"
 	set BindWidgetEntry "$site_5_3_0.outputFileSuffixEntry.lwchildsite.entry"
 	vTcl:DefineAlias "$BindWidgetEntry" "EntryOutputFileSuffixChild" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_5_3_0.outputFileSuffixEntry -in $site_5_3_0 -anchor nw -expand 0 -fill none -side left
+
 	bind $BindWidgetEntry <FocusIn> {
 		if {$PPref(SelectAllText) == "Yes"} {EntryOutputFileSuffixChild select range 0 end}
 		EntryOutputFileSuffixChild icursor end
 	}
 
-	::iwidgets::combobox $site_5_3_0.conversionProgramComboBoxFactorySelection -labeltext "Conversion Program" -labelpos w \
-        -highlightthickness 0 -command {} -width 13 -listheight 50 -selectioncommand {
-	} -textvariable ConversionProgram -justify left
-	vTcl:DefineAlias "$site_5_3_0.conversionProgramComboBoxFactorySelection" "ComboBoxConversionProgramFactorySelection" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_5_3_0.conversionProgramComboBoxFactorySelection -in $site_5_3_0 -anchor w -expand 1 -fill none -side left
+	radiobutton $site_5_3_0.runFromOptRadioButton \
+	-command {} -text opt -value "opt" -variable RunFrom
+	vTcl:DefineAlias "$site_5_3_0.runFromOptRadioButton" "RadioButtonRunFromOpt" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_3_0.runFromOptRadioButton -in $site_5_3_0 -anchor e -expand 1 -fill none -side right
 
-	pack $site_5_1.outputFileSuffixFrame -in $site_5_1 -anchor w -expand 0 -fill x -side top
+	radiobutton $site_5_3_0.runFromUSRRadioButton \
+	-command {} -text usr -value "usr" -variable RunFrom
+	vTcl:DefineAlias "$site_5_3_0.runFromUSRRadioButton" "RadioButtonRunFromUSR" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_3_0.runFromUSRRadioButton -in $site_5_3_0 -anchor e -expand 1 -fill none -side right
 
-	::iwidgets::labeledframe $site_5_1.ftpOptions -labelpos nw -labeltext "FTP Options"
-	vTcl:DefineAlias "$site_5_1.ftpOptions" "LabeledFrameFTPOptions" vTcl:WidgetProc "Toplevel1" 1
+	label $site_5_3_0.runFromLabel -text "Run From" -background #ececec
+	vTcl:DefineAlias "$site_5_3_0.runFromLabel" "LabelRunFrom" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_3_0.runFromLabel -in $site_5_3_0 -anchor e -expand 1 -padx 2 -fill none -side right
 
-	set site_6_0_0 [$site_5_1.ftpOptions childsite]
+	::iwidgets::combobox $site_5_3_0.fFMxProgramComboBoxFactorySelection -labeltext "FFMx Program" -labelpos w \
+        -highlightthickness 0 -command {} -width 10 -listheight 50 -selectioncommand {
+	} -textvariable FFMxProgram -justify left
+	vTcl:DefineAlias "$site_5_3_0.fFMxProgramComboBoxFactorySelection" "ComboBoxFFMxProgramFactorySelection" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_3_0.fFMxProgramComboBoxFactorySelection -in $site_5_3_0 -anchor e -expand 0 -fill none -side right
+
+	pack $site_5_2.outputFileSuffixFrame -in $site_5_2 -anchor w -expand 0 -fill x  -pady 3 -side top
+
+	frame $site_5_2.enableFactoryFrame -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
+	vTcl:DefineAlias "$site_5_2.enableFactoryFrame" "FrameEnableFactory" vTcl:WidgetProc "Toplevel1" 1
+
+	set site_5_2_0  $site_5_2.enableFactoryFrame
+
+	checkbutton $site_5_2_0.enableFactoryCheckBox -command {} -offvalue "No" -onvalue "Yes"  -text "Enable Factory" -variable EnableFactory
+	vTcl:DefineAlias "$site_5_2_0.enableFactoryCheckBox" "CheckButtonEnableFactory" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_2_0.enableFactoryCheckBox -in $site_5_2_0 -anchor nw -expand 0 -padx 5 -fill x -side left
+
+	checkbutton $site_5_2_0.removeLogsCheckBox -command {} -offvalue "No" -onvalue "Yes"  -text "Remove Logs" -variable DeleteConversionLogs
+	vTcl:DefineAlias "$site_5_2_0.removeLogsCheckBox" "CheckButtonRemoveLogs" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_2_0.removeLogsCheckBox -in $site_5_2_0 -anchor nw -expand 0 -padx 5 -fill x -side left
+
+	checkbutton $site_5_2_0.removeSourceCheckBox -command {} -offvalue "No" -onvalue "Yes"  -text "Remove Source" -variable DeleteSource
+	vTcl:DefineAlias "$site_5_2_0.removeSourceCheckBox" "CheckButtonRemoveSource" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_2_0.removeSourceCheckBox -in $site_5_2_0 -anchor nw -expand 0 -padx 5 -fill x -side left
+
+	radiobutton $site_5_2_0.freeFactoryActionCopyRadioButton \
+	-command {} -text Copy -value "Copy" -variable FreeFactoryAction
+	vTcl:DefineAlias "$site_5_2_0.freeFactoryActionCopyRadioButton" "RadioButtonFreeFactoryActionCopy" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_2_0.freeFactoryActionCopyRadioButton -in $site_5_2_0 -anchor ne -expand 0 -fill none -side right
+
+	radiobutton $site_5_2_0.freeFactoryActionEncodeRadioButton \
+	-command {} -text "Encode" -value "Encode" -variable FreeFactoryAction
+	vTcl:DefineAlias "$site_5_2_0.freeFactoryActionEncodeRadioButton" "RadioButtonFreeFactoryActionEncode" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_2_0.freeFactoryActionEncodeRadioButton -in $site_5_2_0 -anchor ne -expand 0 -fill none -side right
+
+	label $site_5_2_0.freeFactoryActionLabel -text "Action" -background #ececec
+	vTcl:DefineAlias "$site_5_2_0.freeFactoryActionLabel" "LabelFreeFactoryAction" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_2_0.freeFactoryActionLabel -in $site_5_2_0 -anchor ne -expand 0 -padx 0 -fill none -side right
+
+	pack $site_5_2.enableFactoryFrame -in $site_5_2 -anchor w -expand 1 -fill x -pady 3 -side top
+
+	::iwidgets::labeledframe $site_5_2.ftpOptions -labelpos nw -labeltext "FTP Options"
+	vTcl:DefineAlias "$site_5_2.ftpOptions" "LabeledFrameFTPOptions" vTcl:WidgetProc "Toplevel1" 1
+
+	set site_6_0_0 [$site_5_2.ftpOptions childsite]
 
 	frame $site_6_0_0.ftpProgramFrame -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
 	vTcl:DefineAlias "$site_6_0_0.ftpProgramFrame" "FrameFTPProgram" vTcl:WidgetProc "Toplevel1" 1
@@ -660,7 +920,7 @@ proc vTclWindow.programFrontEnd {base} {
 	set BindWidget "$site_6_0_1.ftpURLEntry"
 	set BindWidgetEntry "$site_6_0_1.ftpURLEntry.lwchildsite.entry"
 	vTcl:DefineAlias "$BindWidgetEntry" "EntryFTPURLChild" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_6_0_1.ftpURLEntry -in $site_6_0_1 -anchor nw -expand 0 -fill none -side left
+	pack $site_6_0_1.ftpURLEntry -in $site_6_0_1 -anchor nw -expand 1 -fill none -side left
 	bind $BindWidgetEntry <FocusIn> {
 		if {$PPref(SelectAllText) == "Yes"} {EntryFTPURLChild select range 0 end}
 		EntryFTPURLChild icursor end
@@ -671,28 +931,22 @@ proc vTclWindow.programFrontEnd {base} {
 	set BindWidget "$site_6_0_1.ftpUserNameEntry"
 	set BindWidgetEntry "$site_6_0_1.ftpUserNameEntry.lwchildsite.entry"
 	vTcl:DefineAlias "$BindWidgetEntry" "EntryFTPUserNameChild" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_6_0_1.ftpUserNameEntry -in $site_6_0_1 -anchor nw -expand 0 -fill none -side left
+	pack $site_6_0_1.ftpUserNameEntry -in $site_6_0_1 -anchor nw -expand 1 -fill none -side left
 	bind $BindWidgetEntry <FocusIn> {
 		if {$PPref(SelectAllText) == "Yes"} {EntryFTPUserNameChild select range 0 end}
 		EntryFTPUserNameChild icursor end
 	}
 
-	::iwidgets::entryfield $site_6_0_1.ftpPasswordEntry -width 12 -labeltext "Password"  -textvariable FTPPasswordEntry -relief sunken -justify left
+	::iwidgets::entryfield $site_6_0_1.ftpPasswordEntry -width 12 -labeltext "Password"  -textvariable FTPPasswordEntry -relief sunken -justify left -show "*"
 	vTcl:DefineAlias "$site_6_0_1.ftpPasswordEntry" "FTPPasswordEntry" vTcl:WidgetProc "Toplevel1" 1
 	set BindWidget "$site_6_0_1.ftpPasswordEntry"
 	set BindWidgetEntry "$site_6_0_1.ftpPasswordEntry.lwchildsite.entry"
 	vTcl:DefineAlias "$BindWidgetEntry" "EntryFTPPasswordChild" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_6_0_1.ftpPasswordEntry -in $site_6_0_1 -anchor nw -expand 0 -fill none -side left
+	pack $site_6_0_1.ftpPasswordEntry -in $site_6_0_1 -anchor nw -expand 1 -fill none -side left
 	bind $BindWidgetEntry <FocusIn> {
 		if {$PPref(SelectAllText) == "Yes"} {EntryFTPPasswordChild select range 0 end}
 		EntryFTPPasswordChild icursor end
 	}
-
-	::iwidgets::combobox $site_6_0_1.ftpProgramComboBoxFactorySelection -labeltext "FTP Program" -labelpos w \
-        -highlightthickness 0 -command {} -width 13 -listheight 100 -selectioncommand {
-	} -textvariable FTPProgram -justify  left
-	vTcl:DefineAlias "$site_6_0_1.ftpProgramComboBoxFactorySelection" "ComboBoxFTPProgramFactorySelection" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_6_0_1.ftpProgramComboBoxFactorySelection -in $site_6_0_1 -anchor w -expand 1 -fill none -side left
 
 	pack $site_6_0_0.ftpProgramFrame -in $site_6_0_0 -anchor w -expand 0 -fill x -side top
 
@@ -700,6 +954,12 @@ proc vTclWindow.programFrontEnd {base} {
 	vTcl:DefineAlias "$site_6_0_0.ftpRemotePathFrame" "FrameFTPRemotePath" vTcl:WidgetProc "Toplevel1" 1
 
 	set site_6_0_1 $site_6_0_0.ftpRemotePathFrame
+
+	::iwidgets::combobox $site_6_0_1.ftpProgramComboBoxFactorySelection -labeltext "FTP Program" -labelpos w \
+        -highlightthickness 0 -command {} -width 10 -listheight 100 -selectioncommand {
+	} -textvariable FTPProgram -justify  left
+	vTcl:DefineAlias "$site_6_0_1.ftpProgramComboBoxFactorySelection" "ComboBoxFTPProgramFactorySelection" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_6_0_1.ftpProgramComboBoxFactorySelection -in $site_6_0_1 -anchor w -expand 1 -fill none -side left
 
 	::iwidgets::entryfield $site_6_0_1.ftpRemotePathEntry -width 20 -labeltext "FTP Remote Path"  -textvariable FTPRemotePathEntry -relief sunken -justify left
 	vTcl:DefineAlias "$site_6_0_1.ftpRemotePathEntry" "FTPRemotePathEntry" vTcl:WidgetProc "Toplevel1" 1
@@ -712,37 +972,36 @@ proc vTclWindow.programFrontEnd {base} {
 		EntryFTPRemotePathChild icursor end
 	}
 
-	label $site_6_0_1.ftpTransferTypeLabel -text "Transfer Type:" -background #ececec
-	vTcl:DefineAlias "$site_6_0_1.ftpTransferTypeLabel" "LabelFTPTransferType" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_6_0_1.ftpTransferTypeLabel -in $site_6_0_1 -anchor w -expand 0 -padx 2 -fill none -side left
+	pack $site_6_0_0.ftpRemotePathFrame -in $site_6_0_0 -anchor nw -expand 0 -fill x -side top
 
-	radiobutton $site_6_0_1.ftpTransferTypeascRadioButton \
-	-command {} -text ASC -value "asc" -variable FTPTransferType
-	vTcl:DefineAlias "$site_6_0_1.ftpTransferTypeascRadioButton" "RadioButtonFTPTransferTypeASC" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_6_0_1.ftpTransferTypeascRadioButton -in $site_6_0_1 -anchor nw -expand 0 -fill none -side left
+	frame $site_6_0_0.ftpTransferTypeFrame -height 2 -highlightcolor black -relief flat -width 12  -border 2
+	vTcl:DefineAlias "$site_6_0_0.ftpTransferTypeFrame" "FrameFTPTransferType" vTcl:WidgetProc "Toplevel1" 1
+
+	set site_6_0_1 $site_6_0_0.ftpTransferTypeFrame
+
+	checkbutton $site_6_0_1.ftpDeleteAfterCheckBox -command {} -offvalue "No" -onvalue "Yes"  -text "Delete Output File After FTP" -variable FTPDeleteAfter
+	vTcl:DefineAlias "$site_6_0_1.ftpDeleteAfterCheckBox" "CheckButtonFTPDeleteAfter" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_6_0_1.ftpDeleteAfterCheckBox -in $site_6_0_1 -anchor nw -expand 0 -padx 2 -fill x -side left
 
 	radiobutton $site_6_0_1.ftpTransferTypebinRadioButton \
-	-command {} -text BIN -value "bin" -variable FTPTransferType
+	-command {} -text Binary -value "bin" -variable FTPTransferType
 	vTcl:DefineAlias "$site_6_0_1.ftpTransferTypebinRadioButton" "RadioButtonFTPTransferTypeBIN" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_6_0_1.ftpTransferTypebinRadioButton -in $site_6_0_1 -anchor nw -expand 0 -fill none -side left
+	pack $site_6_0_1.ftpTransferTypebinRadioButton -in $site_6_0_1 -anchor nw -expand 0 -fill none -side right
 
-	label $site_6_0_1.ftpDeleteAfterLabel -text "Delete After:" -background #ececec
-	vTcl:DefineAlias "$site_6_0_1.ftpDeleteAfterLabel" "LabelFTPDeleteAfter" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_6_0_1.ftpDeleteAfterLabel -in $site_6_0_1 -anchor w -expand 0 -padx 2 -fill none -side left
+	radiobutton $site_6_0_1.ftpTransferTypeascRadioButton \
+	-command {} -text ASCII -value "asc" -variable FTPTransferType
+	vTcl:DefineAlias "$site_6_0_1.ftpTransferTypeascRadioButton" "RadioButtonFTPTransferTypeASC" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_6_0_1.ftpTransferTypeascRadioButton -in $site_6_0_1 -anchor nw -expand 0 -fill none -side right
 
-	radiobutton $site_6_0_1.ftpDeleteAfteryesRadioButton \
-	-command {} -text "Yes" -value "yes" -variable FTPDeleteAfter
-	vTcl:DefineAlias "$site_6_0_1.ftpDeleteAfteryesRadioButton" "RadioButtonFTPDeleteAfterYes" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_6_0_1.ftpDeleteAfteryesRadioButton -in $site_6_0_1 -anchor nw -expand 0 -fill none -side left
+	label $site_6_0_1.ftpTransferTypeLabel -text "Transfer Type:" -background #ececec
+	vTcl:DefineAlias "$site_6_0_1.ftpTransferTypeLabel" "LabelFTPTransferType" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_6_0_1.ftpTransferTypeLabel -in $site_6_0_1 -anchor w -expand 0 -padx 2 -fill none -side right
 
-	radiobutton $site_6_0_1.ftpDeleteAfternoRadioButton \
-	-command {} -text "No" -value "no" -variable FTPDeleteAfter
-	vTcl:DefineAlias "$site_6_0_1.ftpDeleteAfternoRadioButton" "RadioButtonFTPDeleteAfterNo" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_6_0_1.ftpDeleteAfternoRadioButton -in $site_6_0_1 -anchor nw -expand 0 -fill none -side left
+	pack $site_6_0_0.ftpTransferTypeFrame -in $site_6_0_0 -anchor nw -expand 0 -fill x -side top
 
-	pack $site_6_0_0.ftpRemotePathFrame -in $site_6_0_0 -anchor nw -expand 0 -fill none -side top
+	pack $site_5_2.ftpOptions -in $site_5_2 -anchor w -expand 1 -fill x -pady 5 -side top
 
-	pack $site_5_1.ftpOptions -in $site_5_1 -anchor w -expand 1 -fill x -side top
+	pack $site_5_1.factoryOptionsFrame -in $site_5_1 -anchor w -expand 1 -fill x -side top
 
 	::iwidgets::labeledframe $site_5_1.videoOptions -labelpos nw -labeltext "Video Options"
 	vTcl:DefineAlias "$site_5_1.videoOptions" "LabeledFrameVideoOptions" vTcl:WidgetProc "Toplevel1" 1
@@ -909,7 +1168,7 @@ proc vTclWindow.programFrontEnd {base} {
 	pack $site_6_0_1.groupPicSizeFramesFrame -in $site_6_0_1 -anchor w -expand 0 -fill x -side top
 
 	::iwidgets::combobox $site_6_0.vPresetComboBoxFactorySelection -labeltext "Video Pre" -labelpos w \
-        -highlightthickness 0 -command {} -width 100 -listheight 100 -selectioncommand {
+        -highlightthickness 0 -command {} -width 25 -listheight 100 -selectioncommand {
 	} -textvariable VideoPreset -justify  left
 	vTcl:DefineAlias "$site_6_0.vPresetComboBoxFactorySelection" "ComboBoxVideoPresetFactorySelection" vTcl:WidgetProc "Toplevel1" 1
 	pack $site_6_0.vPresetComboBoxFactorySelection -in $site_6_0 -anchor w -expand 0 -fill none -side top
@@ -922,7 +1181,6 @@ proc vTclWindow.programFrontEnd {base} {
 	vTcl:DefineAlias "$site_5_2.audioOptions" "LabeledFrameAudioOptions" vTcl:WidgetProc "Toplevel1" 1
 
 	set site_6_1 [$site_5_2.audioOptions childsite]
-
 
 	frame $site_6_1.audioCodecsBitRateSampleRateFrame -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
 	vTcl:DefineAlias "$site_6_1.audioCodecsBitRateSampleRateFrame" "FrameAudioCodecsBitRateSampleRate" vTcl:WidgetProc "Toplevel1" 1
@@ -949,7 +1207,6 @@ proc vTclWindow.programFrontEnd {base} {
 
 	pack $site_6_1.audioCodecsBitRateSampleRateFrame -in $site_6_1 -anchor w -expand 0 -fill x -side top
 
-
 	frame $site_6_1.audioFileExtensionTagChannelsFrame -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
 	vTcl:DefineAlias "$site_6_1.audioFileExtensionTagChannelsFrame" "FrameAudioFileExtensionTagChannels" vTcl:WidgetProc "Toplevel1" 1
 
@@ -966,7 +1223,6 @@ proc vTclWindow.programFrontEnd {base} {
 	} -textvariable AudioTag -justify  left
 	vTcl:DefineAlias "$site_6_0_3.audioTagComboBoxFactorySelection" "ComboBoxAudioTagFactorySelection" vTcl:WidgetProc "Toplevel1" 1
 	pack $site_6_0_3.audioTagComboBoxFactorySelection -in $site_6_0_3 -anchor w -expand 1 -fill none -side left
-
 
 	::iwidgets::combobox $site_6_0_3.audioChannelsComboBoxFactorySelection -labeltext "Channels" -labelpos w \
         -highlightthickness 0 -command {} -width 5 -listheight 100 -selectioncommand {
@@ -989,50 +1245,355 @@ proc vTclWindow.programFrontEnd {base} {
         bind $BindWidget <Key-KP_Enter> {}
 
 	pack $site_5_2.audioOptions -in $site_5_2 -anchor w -expand 1 -fill x -side top
+	pack $site_5_0.rightFrame -in $site_1_0.middleFrame -anchor nw -expand 0 -fill none -side left
 
-	::iwidgets::labeledframe $site_5_2.factoryOptionsFrame -labelpos nw -labeltext "Other Factory Options"
-	vTcl:DefineAlias "$site_5_2.factoryOptionsFrame" "LabeledFrameOtherFactoryOptions" vTcl:WidgetProc "Toplevel1" 1
+	frame $site_5_0.factoryEMailAndLinkFrame -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
+	vTcl:DefineAlias "$site_5_0.factoryEMailAndLinkFrame" "FrameEMailAndLink" vTcl:WidgetProc "Toplevel1" 1
 
-	set site_5_3 [$site_5_2.factoryOptionsFrame childsite]
+	set site_5_0_0  $site_5_0.factoryEMailAndLinkFrame
 
-	checkbutton $site_5_3.enableFactoryCheckBox -command {} -offvalue 0 -onvalue 1  -text "Enable Factory" -variable EnableFactory
-	vTcl:DefineAlias "$site_5_3.enableFactoryCheckBox" "CheckButtonEnableFactory" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_5_3.enableFactoryCheckBox -in $site_5_3 -anchor nw -expand 0 -padx 2 -fill x -side left
+	::iwidgets::labeledframe $site_5_0_0.factoryEMailLabeledFrame -labelpos nw -labeltext "Factory Email"
+	vTcl:DefineAlias "$site_5_0_0.factoryEMailLabeledFrame" "LabeledFrameFactoryEmail" vTcl:WidgetProc "Toplevel1" 1
 
-	radiobutton $site_5_3.deleteConversionLogsNoRadioButton \
-	-command {} -text No -value "No" -variable DeleteConversionLogs
-	vTcl:DefineAlias "$site_5_3.deleteConversionLogsNoRadioButton" "RadioButtonDeleteConversionLogsNo" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_5_3.deleteConversionLogsNoRadioButton -in $site_5_3 -anchor nw -expand 0 -fill none -side right
+	set site_5_1 [$site_5_0_0.factoryEMailLabeledFrame childsite]
 
-	radiobutton $site_5_3.deleteConversionLogsYesRadioButton \
-	-command {} -text Yes -value "Yes" -variable DeleteConversionLogs
-	vTcl:DefineAlias "$site_5_3.deleteConversionLogsYesRadioButton" "RadioButtonDeleteConversionLogsYes" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_5_3.deleteConversionLogsYesRadioButton -in $site_5_3 -anchor nw -expand 0 -fill none -side right
+	frame $site_5_1.enableEMailFrame -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
+	vTcl:DefineAlias "$site_5_1.enableEMailFrame" "FrameEMailEnable" vTcl:WidgetProc "Toplevel1" 1
 
-	label $site_5_3.deleteLogLabel -text "Delete Logs" -background #ececec
-	vTcl:DefineAlias "$site_5_3.deleteLogLabel" "LabelDeleteLog" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_5_3.deleteLogLabel -in $site_5_3 -anchor w -expand 0 -padx 2 -fill none -side right
+	set site_5_1_0  $site_5_1.enableEMailFrame
 
-	radiobutton $site_5_3.deleteSourceNoRadioButton \
-	-command {} -text No -value "No" -variable DeleteSource
-	vTcl:DefineAlias "$site_5_3.deleteSourceNoRadioButton" "RadioButtonDeleteSourceNo" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_5_3.deleteSourceNoRadioButton -in $site_5_3 -anchor nw -expand 0 -fill none -side right
+	checkbutton $site_5_1_0.enableFactoryEMailCheckBox -command {} -offvalue "No" -onvalue "Yes"  -text "Enable EMail" -variable FactoryEnableEMail
+	vTcl:DefineAlias "$site_5_1_0.enableFactoryEMailCheckBox" "CheckButtonEnableFactoryEMail" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_1_0.enableFactoryEMailCheckBox -in $site_5_1_0 -anchor nw -expand 0 -padx 2 -fill x -side left
 
-	radiobutton $site_5_3.deleteSourceYesRadioButton \
-	-command {} -text Yes -value "Yes" -variable DeleteSource
-	vTcl:DefineAlias "$site_5_3.deleteSourceYesRadioButton" "RadioButtonDeleteSourceYes" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_5_3.deleteSourceYesRadioButton -in $site_5_3 -anchor nw -expand 0 -fill none -side right
+	button $site_5_1_0.addFactoryEMailMessageButton -borderwidth 1 -highlightthickness 0 -relief raised \
+	-command {
+		source "/opt/FreeFactory/bin/FreeFactoryEMailMessage.tcl"
+		Window show .freeFactoryEMailMessage
+		Window show .freeFactoryEMailMessage
+		widgetUpdate
+		ScrolledTextFactoryEMailMessage clear
+		ScrolledTextFactoryEMailMessage insert end $FactoryEMailMessage
+	} -image [vTcl:image:get_image [file join / opt FreeFactory Pics message32x32.gif]]
+	vTcl:DefineAlias "$site_5_1_0.addFactoryEMailMessageButton" "ButtonAddFactoryEMailMessage" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_1_0.addFactoryEMailMessageButton -in $site_5_1_0 -anchor center -expand 1 -fill none -side right
+	balloon $site_5_1_0.addFactoryEMailMessageButton "Add Message"
 
-	label $site_5_3.deleteSourceLabel -text "Delete Source" -background #ececec
-	vTcl:DefineAlias "$site_5_3.deleteSourceLabel" "LabelDeleteSource" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_5_3.deleteSourceLabel -in $site_5_3 -anchor w -expand 0 -padx 2 -fill none -side right
+	pack $site_5_1.enableEMailFrame -in $site_5_1 -anchor w -expand 1 -fill x -side top
 
-	pack $site_5_2.factoryOptionsFrame -in $site_5_2 -anchor w -expand 1 -fill x -side top
+	::iwidgets::entryfield $site_5_1.eMailNameEntry -width 7 -labelpos w -labeltext "Name" -textvariable FactoryEMailNameEntry
+	vTcl:DefineAlias "$site_5_1.eMailNameEntry" "EntryFactoryEMailName" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_1.eMailNameEntry -in $site_5_1 -anchor nw -expand 0 -fill x -side top
+	set BindWidget "$site_5_1.eMailNameEntry"
+	set BindWidgetEntry "$site_5_1.eMailNameEntry.lwchildsite.entry"
+	vTcl:DefineAlias "$BindWidgetEntry" "EntryFactoryEMailNameChild" vTcl:WidgetProc "Toplevel1" 1
+        bind $BindWidgetEntry <Key-Return> {focus .programFrontEnd.middleFrame.factoryEMailAndLinkFrame.factoryEMailLabeledFrame.childsite.eMailAddressEntry.lwchildsite.entry}
+        bind $BindWidgetEntry <Key-KP_Enter> {focus .programFrontEnd.middleFrame.factoryEMailAndLinkFrame.factoryEMailLabeledFrame.childsite.eMailAddressEntry.lwchildsite.entry}
+	bind $BindWidgetEntry <FocusIn> {
+		if {$PPref(SelectAllText) == "Yes"} {EntryFactoryEMailName selection range 0 end}
+		EntryFactoryEMailNameChild icursor end
+	}
 
-	pack $site_5_0.rightFrame -in $site_1_0.middleFrame -anchor nw -expand 1 -fill both -side right
+	::iwidgets::entryfield $site_5_1.eMailAddressEntry -width 7 -labelpos w -labeltext "Address" -textvariable FactoryEMailAddressEntry
+	vTcl:DefineAlias "$site_5_1.eMailAddressEntry" "EntryFactoryEMailAddress" vTcl:WidgetProc "Toplevel1" 1
+	set BindWidget "$site_5_1.eMailAddressEntry"
+	set BindWidgetEntry "$site_5_1.eMailAddressEntry.lwchildsite.entry"
+	vTcl:DefineAlias "$BindWidget" "EntryFactoryEMailAddressChild" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_1.eMailAddressEntry -in $site_5_1 -anchor nw -expand 0 -fill x -side top
+        bind $BindWidgetEntry <Key-Return> {focus .programFrontEnd.middleFrame.factoryEMailAndLinkFrame.factoryEMailLabeledFrame.childsite.eMailNameEntry.lwchildsite.entry}
+        bind $BindWidgetEntry <Key-KP_Enter> {focus .programFrontEnd.middleFrame.factoryEMailAndLinkFrame.factoryEMailLabeledFrame.childsite.eMailNameEntry.lwchildsite.entry}
+	bind $BindWidgetEntry <FocusIn> {
+		if {$PPref(SelectAllText) == "Yes"} {EntryFactoryEMailAddress selection range 0 end}
+		EntryFactoryEMailAddressChild icursor end
+	}
+
+	::iwidgets::scrolledlistbox $site_5_1.factoryEMailListBox -activebackground #f9f9f9 -activerelief raised -background #e6e6e6 \
+	-borderwidth 2 -disabledforeground #a3a3a3 -foreground #000000 -height 100 -highlightcolor black -highlightthickness 1 \
+	-hscrollmode dynamic -selectmode single -jump 0 -labelpos n -labeltext "" -relief sunken \
+	-sbwidth 10 -selectbackground #c4c4c4 -selectborderwidth 1 -selectforeground black -state normal \
+	-textbackground #d9d9d9 -troughcolor #c4c4c4 -vscrollmode dynamic -dblclickcommand {} -selectioncommand {
+# This code prevents an error when an empty list box is clicked on.
+		set EMailFactoryPos -1
+		catch [set EMailFactoryPos [ScrolledListBoxFactoryEMail curselection ]]
+		if {$EMailFactoryPos > -1 } {
+			set FactoryEMailNameEntry [ScrolledListBoxFactoryEMail get [ScrolledListBoxFactoryEMail curselection ]]
+			set FactoryEMailAddressEntry [lindex $FactoryEMailsAddress [ScrolledListBoxFactoryEMail curselection ]]
+			ButtonAddEMail configure -state disable
+			ButtonUpdateEMail configure -state normal
+			ButtonRemoveEMail configure -state normal
+		}
+	} -width 150
+	vTcl:DefineAlias "$site_5_1.factoryEMailListBox" "ScrolledListBoxFactoryEMail" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_1.factoryEMailListBox -in $site_5_1 -anchor n -expand 0 -fill both -side top
+
+	frame $site_5_1.factoryEMailButtonFrame -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
+	vTcl:DefineAlias "$site_5_1.factoryEMailButtonFrame" "FrameFactoryEMailButton" vTcl:WidgetProc "Toplevel1" 1
+
+	set site_5_1_0  $site_5_1.factoryEMailButtonFrame
+
+	button $site_5_1_0.newEMailButton -borderwidth 1 -highlightthickness 0 -relief raised \
+	-command {
+		set FactoryEMailNameEntry ""
+		set FactoryEMailAddressEntry ""
+		ButtonAddEMail configure -state normal
+		ButtonUpdateEMail configure -state disable
+		ButtonRemoveEMail configure -state disable
+		focus .programFrontEnd.middleFrame.factoryEMailAndLinkFrame.factoryEMailLabeledFrame.childsite.eMailNameEntry.lwchildsite.entry
+	} -image [vTcl:image:get_image [file join / opt FreeFactory Pics new32x32.gif]]
+	vTcl:DefineAlias "$site_5_1_0.newEMailButton" "ButtonNewEMail" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_1_0.newEMailButton -in $site_5_1_0 -anchor center -expand 1 -fill none -side left
+	balloon $site_5_1_0.newEMailButton "New EMail"
+
+	button $site_5_1_0.addEMailButton -borderwidth 1 -highlightthickness 0 -relief raised \
+	-command {
+		if {[string trim $FactoryEMailNameEntry] !="" && [string trim $FactoryEMailAddressEntry] !=""} {
+			set ListLength [llength $FactoryEMailsName]
+			set InList "No"
+			for {set x 0} {$x < $ListLength} {incr x} {
+				if {[lindex $FactoryEMailsName $x] == $FactoryEMailNameEntry} {
+					set InList "Yes"
+					break
+				}
+			}
+			if {$InList == "No"} {
+				lappend FactoryEMailsName $FactoryEMailNameEntry
+				lappend FactoryEMailsAddress $FactoryEMailAddressEntry
+			}
+# Load the list box with factory emails.
+			ScrolledListBoxFactoryEMail delete 0 end
+			set ListLength [llength $FactoryEMailsName]
+			for {set x 0} {$x < $ListLength} {incr x} {
+				ScrolledListBoxFactoryEMail insert end [lindex $FactoryEMailsName $x]
+			}
+			set FactoryEMailNameEntry ""
+			set FactoryEMailAddressEntry ""
+			ButtonAddEMail configure -state disable
+		}
+	} -image [vTcl:image:get_image [file join / opt FreeFactory Pics AddEMailUser32x32.gif]]
+	vTcl:DefineAlias "$site_5_1_0.addEMailButton" "ButtonAddEMail" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_1_0.addEMailButton -in $site_5_1_0 -anchor center -expand 1 -fill none -side left
+	balloon $site_5_1_0.addEMailButton "Add EMail - The factctory\nmust be saved to actually\nsave any additions."
+
+	button $site_5_1_0.updateEMailButton -borderwidth 1 -highlightthickness 0 -relief raised \
+	-command {
+		set ListLength [llength $FactoryEMailsName]
+		set InList "No"
+		for {set x 0} {$x < $ListLength} {incr x} {
+			if {[lindex $FactoryEMailsName $x] == $FactoryEMailNameEntry} {
+				set InList "Yes"
+				break
+			}
+		}
+		if {$InList == "No"} {
+			set FactoryEMailsName [lreplace $FactoryEMailsName $EMailFactoryPos $EMailFactoryPos $FactoryEMailNameEntry]
+			set FactoryEMailsAddress [lreplace $FactoryEMailsAddress $EMailFactoryPos $EMailFactoryPos $FactoryEMailAddressEntry]
+		}
+# Load the list box with factory emails.
+		ScrolledListBoxFactoryEMail delete 0 end
+		for {set x 0} {$x < $ListLength} {incr x} {
+			ScrolledListBoxFactoryEMail insert end [lindex $FactoryEMailsName $x]
+		}
+		set FactoryEMailNameEntry ""
+		set FactoryEMailAddressEntry ""
+		ButtonUpdateEMail configure -state disable
+		ButtonRemoveEMail configure -state disable
+	} -image [vTcl:image:get_image [file join / opt FreeFactory Pics update32x32.gif]]
+	vTcl:DefineAlias "$site_5_1_0.updateEMailButton" "ButtonUpdateEMail" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_1_0.updateEMailButton -in $site_5_1_0 -anchor center -expand 1 -fill none -side left
+	balloon $site_5_1_0.updateEMailButton "Update EMail - The factctory\nmust be saved to actually\nsave any changes."
+
+	button $site_5_1_0.removeEMailButton -borderwidth 1 -highlightthickness 0 -relief raised \
+	-command {
+		set FactoryEMailsNameRemove ""
+		set FactoryEMailsAddressRemove ""
+		set ListLength [llength $FactoryEMailsName]
+		for {set x 0} {$x < $ListLength} {incr x} {
+			if {$EMailFactoryPos != $x} {
+				lappend FactoryEMailsNameRemove [lindex $FactoryEMailsName $x]
+				lappend FactoryEMailsAddressRemove [lindex $FactoryEMailsAddress $x]
+			}
+		}
+		set FactoryEMailsName $FactoryEMailsNameRemove
+		set FactoryEMailsAddress $FactoryEMailsAddressRemove
+# Load the list box with linked factories.
+		ScrolledListBoxFactoryEMail delete 0 end
+		for {set x 0} {$x < $ListLength} {incr x} {
+			ScrolledListBoxFactoryEMail insert end [lindex $FactoryEMailsName $x]
+		}
+		set FactoryEMailNameEntry ""
+		set FactoryEMailAddressEntry ""
+		ButtonUpdateEMail configure -state disable
+		ButtonRemoveEMail configure -state disable
+	} -image [vTcl:image:get_image [file join / opt FreeFactory Pics RemoveEMailUser32x32.gif]]
+	vTcl:DefineAlias "$site_5_1_0.removeEMailButton" "ButtonRemoveEMail" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_1_0.removeEMailButton -in $site_5_1_0 -anchor center -expand 1 -fill none -side left
+	balloon $site_5_1_0.removeEMailButton "Remove EMail -  - The factctory\nmust be saved to actually\nrecord any removals."
+
+	pack $site_5_1.factoryEMailButtonFrame -in $site_5_1 -anchor nw -expand 0 -fill x -side top
+	pack $site_5_0_0.factoryEMailLabeledFrame -in $site_5_0_0 -anchor nw -expand 0 -fill both -side top
+
+	::iwidgets::labeledframe $site_5_0_0.factoryLinkingLabeledFrame -labelpos nw -labeltext "Factory Linking"
+	vTcl:DefineAlias "$site_5_0_0.factoryLinkingLabeledFrame" "LabeledFrameFactoryLinking" vTcl:WidgetProc "Toplevel1" 1
+
+	set site_5_1 [$site_5_0_0.factoryLinkingLabeledFrame childsite]
+
+	checkbutton $site_5_1.enableFactoryLinkingCheckBox -command {} -offvalue "No" -onvalue "Yes"  -text "Enable Factory Linking" -variable EnableFactoryLinking
+	vTcl:DefineAlias "$site_5_1.enableFactoryLinkingCheckBox" "CheckButtonEnableFactoryLinking" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_1.enableFactoryLinkingCheckBox -in $site_5_1 -anchor nw -expand 0 -padx 0 -fill none -side top
+
+	::iwidgets::combobox $site_5_1.linkedFactoryComboBoxFactorySelection -editable 0 -labeltext "Selected Factory" -labelpos n \
+        -highlightthickness 0 -command {} -width 13 -listheight 350 -selectioncommand {
+# Only disable the Add button if there is something to add
+		if {$LinkedFactory !=""} {
+			ButtonAddLink configure -state normal
+			ButtonRemoveLink configure -state disable
+		} else {
+			ButtonAddLink configure -state disable
+			ButtonRemoveLink configure -state disable
+		}
+	} -textvariable LinkedFactory -justify  left
+	vTcl:DefineAlias "$site_5_1.linkedFactoryComboBoxFactorySelection" "ComboBoxLinkedFactory" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_1.linkedFactoryComboBoxFactorySelection -in $site_5_1 -anchor nw -expand 0 -fill x -side top
+	set BindWidget "$site_5_1.linkedFactoryComboBoxFactorySelection.lwchildsite.entry"
+	vTcl:DefineAlias "$BindWidget" "ComboBoxLinkedFactoryEntryChild" vTcl:WidgetProc "Toplevel1" 1
+
+	::iwidgets::entryfield $site_5_1.linkedListEntryLabel -width 10 -labelpos w -relief flat -labeltext "Linked To:" -textvariable SelectedFactory
+	vTcl:DefineAlias "$site_5_1.linkedListEntryLabel" "EntryLabelLinkedFactories" vTcl:WidgetProc "Toplevel1" 1
+	set BindWidget "$site_5_1.linkedListEntryLabel.lwchildsite.entry"
+	pack $site_5_1.linkedListEntryLabel -in $site_5_1 -anchor w -expand 0 -fill x -side top
+
+	::iwidgets::scrolledlistbox $site_5_1.linkedFactoriesListBox -activebackground #f9f9f9 -activerelief raised -background #e6e6e6 \
+	-borderwidth 2 -disabledforeground #a3a3a3 -foreground #000000 -height 100 -highlightcolor black -highlightthickness 1 \
+	-hscrollmode dynamic -selectmode single -jump 0 -labelpos n -labeltext "" -relief sunken \
+	-sbwidth 10 -selectbackground #c4c4c4 -selectborderwidth 1 -selectforeground black -state normal \
+	-textbackground #d9d9d9 -troughcolor #c4c4c4 -vscrollmode dynamic -dblclickcommand {} -selectioncommand {
+# This code prevents an error when an empty list box is clicked on.
+		set LinkedFactoryPos -1
+		catch [set LinkedFactoryPos [ScrolledListBoxFactoryLinking curselection ]]
+		if {$LinkedFactoryPos > -1 } {
+			set LinkedFactory [ScrolledListBoxFactoryLinking get [ScrolledListBoxFactoryLinking curselection ]]
+			ButtonAddLink configure -state disable
+			ButtonRemoveLink configure -state normal
+		}
+	} -width 150
+	vTcl:DefineAlias "$site_5_1.linkedFactoriesListBox" "ScrolledListBoxFactoryLinking" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_1.linkedFactoriesListBox -in $site_5_1 -anchor n -expand 1 -fill both -side top
+
+	frame $site_5_1.factoryLinkingButtonFrame -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
+	vTcl:DefineAlias "$site_5_1.factoryLinkingButtonFrame" "FrameFactoryLinkingButton" vTcl:WidgetProc "Toplevel1" 1
+
+	set site_5_1_0  $site_5_1.factoryLinkingButtonFrame
+
+	button $site_5_1_0.addLinkButton -borderwidth 1 -highlightthickness 0 -relief raised \
+	-command {
+		lappend FactoryLinks $LinkedFactory
+		set LinkedFactory ""
+		ComboBoxLinkedFactory clear
+		ComboBoxLinkedFactory insert list end ""
+		ScrolledListBoxFactoryLinking delete 0 end
+		set ListLength [llength $FactoryLinks]
+		foreach item [lsort [glob -nocomplain /opt/FreeFactory/Factories/*]] {
+# Also check to see if factory already linked.
+			set Linked "Ok"
+			for {set x 0} {$x < $ListLength} {incr x} {
+				if {[file tail $item] == [lindex $FactoryLinks $x]} {
+					set Linked "No"
+					break
+				}
+			}
+# If factory not already linked and the factory in not itself then add to the combo box.
+			if {$SelectedFactory != [file tail $item] && $Linked == "Ok"} {
+				ComboBoxLinkedFactory insert list end [file tail $item]
+			}
+		}
+# Load the list box with linked factories.
+		ScrolledListBoxFactoryLinking delete 0 end
+		for {set x 0} {$x < $ListLength} {incr x} {
+			ScrolledListBoxFactoryLinking insert end [lindex $FactoryLinks $x]
+			set FileHandle [open "/opt/FreeFactory/Factories/[lindex $FactoryLinks $x]" r]
+			while {![eof $FileHandle]} {
+				gets $FileHandle FactoryVar
+				set EqualDelimiter [string first "=" $FactoryVar]
+				if {$EqualDelimiter>0 && [string first "#" [string trim $FactoryVar]]!=0} {
+					set FactoryField [string trim [string range $FactoryVar 0 [expr $EqualDelimiter - 1]]]
+					set FactoryValue [string trim [string range $FactoryVar [expr $EqualDelimiter + 1] end]]
+					if {$FactoryField == "ENABLEFACTORY"} {
+						if {$FactoryValue != "Yes"} {
+							ScrolledListBoxFactoryLinking itemconfigure end -background #efefef
+						}
+					}
+				}
+			}
+			close $FileHandle
+		}
+		ButtonAddLink configure -state disable
+	} -image [vTcl:image:get_image [file join / opt FreeFactory Pics AddFactoryLink32x32.gif]]
+	vTcl:DefineAlias "$site_5_1_0.addLinkButton" "ButtonAddLink" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_1_0.addLinkButton -in $site_5_1_0 -anchor center -expand 1 -fill none -side left
+	balloon $site_5_1_0.addLinkButton "Add Link - The factctory\nmust be saved to actually\nsave any additions."
+
+	button $site_5_1_0.removeLinkButton -borderwidth 1 -highlightthickness 0 -relief raised \
+	-command {
+		set FactoryLinksRemove ""
+		set ListLength [llength $FactoryLinks]
+		for {set x 0} {$x < $ListLength} {incr x} {
+			if {$LinkedFactoryPos != $x} {
+				lappend FactoryLinksRemove [lindex $FactoryLinks $x]
+			}
+		}
+		set FactoryLinks $FactoryLinksRemove
+		set LinkedFactory ""
+		ComboBoxLinkedFactory clear
+		ComboBoxLinkedFactory insert list end ""
+		ScrolledListBoxFactoryLinking delete 0 end
+		set ListLength [llength $FactoryLinks]
+		foreach item [lsort [glob -nocomplain /opt/FreeFactory/Factories/*]] {
+# Also check to see if factory already linked.
+			set Linked "Ok"
+			for {set x 0} {$x < $ListLength} {incr x} {
+				if {[file tail $item] == [lindex $FactoryLinks $x]} {
+					set Linked "No"
+					break
+				}
+			}
+# If factory not already linked and the factory in not itself then add to the combo box.
+			if {$SelectedFactory != [file tail $item] && $Linked == "Ok"} {
+				ComboBoxLinkedFactory insert list end [file tail $item]
+			}
+		}
+# Load the list box with linked factories.
+		ScrolledListBoxFactoryLinking delete 0 end
+		for {set x 0} {$x < $ListLength} {incr x} {
+			ScrolledListBoxFactoryLinking insert end [lindex $FactoryLinks $x]
+			set FileHandle [open "/opt/FreeFactory/Factories/[lindex $FactoryLinks $x]" r]
+			while {![eof $FileHandle]} {
+				gets $FileHandle FactoryVar
+				set EqualDelimiter [string first "=" $FactoryVar]
+				if {$EqualDelimiter>0 && [string first "#" [string trim $FactoryVar]]!=0} {
+					set FactoryField [string trim [string range $FactoryVar 0 [expr $EqualDelimiter - 1]]]
+					set FactoryValue [string trim [string range $FactoryVar [expr $EqualDelimiter + 1] end]]
+					if {$FactoryField == "ENABLEFACTORY"} {
+						if {$FactoryValue != "Yes"} {
+							ScrolledListBoxFactoryLinking itemconfigure end -background #efefef
+						}
+					}
+				}
+			}
+			close $FileHandle
+		}
+		ComboBoxLinkedFactory clear entry
+		ButtonRemoveLink configure -state disable
+	} -image [vTcl:image:get_image [file join / opt FreeFactory Pics RemoveFactoryLink32x32.gif]]
+	vTcl:DefineAlias "$site_5_1_0.removeLinkButton" "ButtonRemoveLink" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_5_1_0.removeLinkButton -in $site_5_1_0 -anchor center -expand 1 -fill none -side left
+	balloon $site_5_1_0.removeLinkButton "Remove Link - The factctory\nmust be saved to actually\nrecord any removals."
+
+	pack $site_5_1.factoryLinkingButtonFrame -in $site_5_1 -anchor nw -expand 0 -fill x -side top
+	pack $site_5_0_0.factoryLinkingLabeledFrame -in $site_5_0_0 -anchor nw -expand 1 -fill both -side top
+
+	pack $site_5_0.factoryEMailAndLinkFrame -in $site_5_0 -anchor w -expand 1 -fill x -side left
+
 	pack $site_1_0.middleFrame -in $site_1_0 -anchor nw -expand 1 -fill both -side top
-
-
 #####################################################################################################################
 #####################################################################################################################
 #####################################################################################################################
@@ -1093,16 +1654,30 @@ proc vTclWindow.programFrontEnd {base} {
 proc InitFreeFactory {} {
 ##########################
 # Free Factory variables
-	global FreeFactoryDataDirectoryPath FreeFactoryDataFileName SaveFilePath DeleteSource DeleteConversionLogs EnableFactory
+	global DeleteSource DeleteConversionLogs EnableFactory
+	global FactoryDescription NotifyDirectoryEntry SelectedFactory OutputFileSuffixEntry FFMxProgram OutputDirectoryEntry
+	global FTPProgram FTPURLEntry FTPUserNameEntry FTPPasswordEntry FTPRemotePathEntry FTPTransferType FTPDeleteAfter
+	global RunFrom FactoryLinks FreeFactoryAction FactoryEnableEMail FactoryEMailNameEntry FactoryEMailAddressEntry FactoryEMailsName
+	global EnableFactoryLinking FactoryEMailsAddress FactoryEMailMessage GlobalEMailMessage
+
+	global DeleteSourceTmp DeleteConversionLogsTmp EnableFactoryTmp
+	global FactoryDescriptionTmp NotifyDirectoryEntryTmp SelectedFactoryTmp OutputFileSuffixEntryTmp FFMxProgramTmp OutputDirectoryEntryTmp
+	global FTPProgramTmp FTPURLEntryTmp FTPUserNameEntryTmp FTPPasswordEntryTmp FTPRemotePathEntryTmp FTPTransferTypeTmp FTPDeleteAfterTmp
+	global RunFromTmp FactoryLinksTmp FreeFactoryActionTmp FactoryEnableEMailTmp FactoryEMailNameEntryTmp FactoryEMailAddressEntryTmp FactoryEMailsNameTmp
+	global EnableFactoryLinkingTmp FactoryEMailsAddressTmp FactoryEMailMessageTmp
 
 ##########################
 # Video and Audio variables
-	global FactoryDescription NotifyDirectoryEntry SelectedFactory OutputFileSuffixEntry ConversionProgram OutputDirectoryEntry
-	global FTPProgram FTPURLEntry FTPUserNameEntry FTPPasswordEntry FTPRemotePathEntry FTPTransferType FTPDeleteAfter
-	global VideoCodecs VideoWrapper VideoFrameRate VideoSize VideoTarget VideoTags Threads Aspect VideoBitRate VideoPreset VideoStreamID 
+	global VideoCodecs VideoWrapper VideoFrameRate VideoSize VideoTarget VideoTags Threads Aspect VideoBitRate VideoPreset VideoStreamID
 	global GroupPicSizeEntry BFramesEntry FrameStrategyEntry StartTimeOffsetEntry ForceFormat
 	global AudioCodecs AudioBitRate AudioSampleRate AudioTag AudioChannels AudioStreamID AudioFileExtension
 
+	global VideoCodecsTmp VideoWrapperTmp VideoFrameRateTmp VideoSizeTmp VideoTargetTmp VideoTagsTmp ThreadsTmp AspectTmp VideoBitRateTmp VideoPresetTmp VideoStreamIDTmp
+	global GroupPicSizeEntryTmp BFramesEntryTmp FrameStrategyEntryTmp StartTimeOffsetEntryTmp ForceFormatTmp
+	global AudioCodecsTmp AudioBitRateTmp AudioSampleRateTmp AudioTagTmp AudioChannelsTmp AudioStreamIDTmp AudioFileExtensionTmp
+
+	set SelectedFactory ""
+	set SelectedFactoryTmp ""
 	InitVariables
 
 	ScrolledListBoxFactoryFilesFactorySelection delete 0 end
@@ -1126,8 +1701,8 @@ proc InitFreeFactory {} {
 				set FactoryValue [string trim [string range $FactoryVar [expr $EqualDelimiter + 1] end]]
 				switch $FactoryField {
 					"ENABLEFACTORY" {
-						if {$FactoryValue != 1} {
-							ScrolledListBoxFactoryFilesFactorySelection itemconfigure end -background #cccccc
+						if {$FactoryValue != "Yes"} {
+							ScrolledListBoxFactoryFilesFactorySelection itemconfigure end -background #efefef
 						}
 					}
 				}
@@ -1151,11 +1726,11 @@ proc InitFreeFactory {} {
 	}
 	close $FileHandle
 
-	ComboBoxConversionProgramFactorySelection clear
-	ComboBoxConversionProgramFactorySelection insert list end ""
-	ComboBoxConversionProgramFactorySelection insert list end "ffmbc"
-	ComboBoxConversionProgramFactorySelection insert list end "ffmpeg"
-#	ComboBoxConversionProgramFactorySelection insert list end "libav"
+	ComboBoxFFMxProgramFactorySelection clear
+	ComboBoxFFMxProgramFactorySelection insert list end ""
+	ComboBoxFFMxProgramFactorySelection insert list end "ffmbc"
+	ComboBoxFFMxProgramFactorySelection insert list end "ffmpeg"
+#	ComboBoxFFMxProgramFactorySelection insert list end "libav"
 
 	ComboBoxFTPProgramFactorySelection clear
 	ComboBoxFTPProgramFactorySelection insert list end ""
@@ -1165,17 +1740,23 @@ proc InitFreeFactory {} {
 
 	ComboBoxVideoCodecsFactorySelection clear
 	ComboBoxVideoCodecsFactorySelection insert list end ""
+	ComboBoxVideoCodecsFactorySelection insert list end "copy"
 	ComboBoxVideoCodecsFactorySelection insert list end "DNxHD"
 	ComboBoxVideoCodecsFactorySelection insert list end "dvcpro-hd"
 	ComboBoxVideoCodecsFactorySelection insert list end "h264"
 	ComboBoxVideoCodecsFactorySelection insert list end "libx264"
-	ComboBoxVideoCodecsFactorySelection insert list end "mpeg1"
-	ComboBoxVideoCodecsFactorySelection insert list end "mpeg2"
+	ComboBoxVideoCodecsFactorySelection insert list end "mpeg1video"
 	ComboBoxVideoCodecsFactorySelection insert list end "mpeg2video"
 	ComboBoxVideoCodecsFactorySelection insert list end "mpeg4"
 	ComboBoxVideoCodecsFactorySelection insert list end "mxf"
 	ComboBoxVideoCodecsFactorySelection insert list end "xdcam"
 	ComboBoxVideoCodecsFactorySelection insert list end "xvid"
+	ComboBoxVideoCodecsFactorySelection insert list end "flv1"
+	ComboBoxVideoCodecsFactorySelection insert list end "jpeg2000"
+	ComboBoxVideoCodecsFactorySelection insert list end "mjpeg"
+	ComboBoxVideoCodecsFactorySelection insert list end "wmv1"
+	ComboBoxVideoCodecsFactorySelection insert list end "wmv2"
+	ComboBoxVideoCodecsFactorySelection insert list end "wmv3"
 
 	ComboBoxVideoWrapperFactorySelection clear
 	ComboBoxVideoWrapperFactorySelection insert list end ""
@@ -1238,6 +1819,13 @@ proc InitFreeFactory {} {
 	ComboBoxTargetFactorySelection insert list end ""
 	ComboBoxTargetFactorySelection insert list end "dvcprohd"
 	ComboBoxTargetFactorySelection insert list end "xdcamhd422"
+	ComboBoxTargetFactorySelection insert list end "ntsc-dvd"
+	ComboBoxTargetFactorySelection insert list end "pal-dvd"
+	ComboBoxTargetFactorySelection insert list end "film-dvd"
+	ComboBoxTargetFactorySelection insert list end "vcd"
+	ComboBoxTargetFactorySelection insert list end "svcd"
+	ComboBoxTargetFactorySelection insert list end "imx30"
+	ComboBoxTargetFactorySelection insert list end "imx50"
 
 	ComboBoxTagsFactorySelection clear
 	ComboBoxTagsFactorySelection insert list end ""
@@ -1247,14 +1835,17 @@ proc InitFreeFactory {} {
 
 	ComboBoxThreadsFactorySelection clear
 	ComboBoxThreadsFactorySelection insert list end ""
+	ComboBoxThreadsFactorySelection insert list end "1"
+	ComboBoxThreadsFactorySelection insert list end "2"
+	ComboBoxThreadsFactorySelection insert list end "4"
 	ComboBoxThreadsFactorySelection insert list end "8"
 
 	ComboBoxAspectFactorySelection clear
 	ComboBoxAspectFactorySelection insert list end ""
-	ComboBoxAspectFactorySelection insert list end "4:3+"
-	ComboBoxAspectFactorySelection insert list end "5:4+"
-	ComboBoxAspectFactorySelection insert list end "16:9+"
-	ComboBoxAspectFactorySelection insert list end "1.85:1+"
+	ComboBoxAspectFactorySelection insert list end "4:3"
+	ComboBoxAspectFactorySelection insert list end "5:4"
+	ComboBoxAspectFactorySelection insert list end "16:9"
+	ComboBoxAspectFactorySelection insert list end "1.85:1"
 
 	ComboBoxVideoBitRateFactorySelection clear
 	ComboBoxVideoBitRateFactorySelection insert list end ""
@@ -1272,8 +1863,40 @@ proc InitFreeFactory {} {
 
 	ComboBoxVideoPresetFactorySelection clear
 	ComboBoxVideoPresetFactorySelection insert list end ""
-	ComboBoxVideoPresetFactorySelection insert list end "libx264-slowfirstpass"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-baseline"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-default"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-faster"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-faster_firstpass"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-fast"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-fast_firstpass"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-fastfirstpass"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-hq"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-ipod320"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-ipod640"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-lossless_fast"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-lossless_max"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-lossless_medium"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-lossless_slower"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-lossless_slow"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-lossless_ultrafast"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-main"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-max"
 	ComboBoxVideoPresetFactorySelection insert list end "libx264-medium"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-medium_firstpass"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-normal"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-placebo"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-placebo_firstpass"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-slower"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-slower_firstpass"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-slow"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-slow_firstpass"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-slowfirstpass"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-ultrafast"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-ultrafast_firstpass"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-veryfast"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-veryfast_firstpass"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-veryslow"
+	ComboBoxVideoPresetFactorySelection insert list end "libx264-veryslow_firstpass"
 
 	ComboBoxForceFormatFactorySelection clear
 	ComboBoxForceFormatFactorySelection insert list end ""
@@ -1281,14 +1904,18 @@ proc InitFreeFactory {} {
 
 	ComboBoxAudioCodecsFactorySelection clear
 	ComboBoxAudioCodecsFactorySelection insert list end ""
+	ComboBoxAudioCodecsFactorySelection insert list end "copy"
 	ComboBoxAudioCodecsFactorySelection insert list end "ac3"
 	ComboBoxAudioCodecsFactorySelection insert list end "ac3_fixed"
+	ComboBoxAudioCodecsFactorySelection insert list end "dts"
 	ComboBoxAudioCodecsFactorySelection insert list end "acc"
-	ComboBoxAudioCodecsFactorySelection insert list end "copy"
 	ComboBoxAudioCodecsFactorySelection insert list end "libfaac"
 	ComboBoxAudioCodecsFactorySelection insert list end "mp2"
 	ComboBoxAudioCodecsFactorySelection insert list end "mp3"
 	ComboBoxAudioCodecsFactorySelection insert list end "pcm_s16le"
+	ComboBoxAudioCodecsFactorySelection insert list end "flac"
+	ComboBoxAudioCodecsFactorySelection insert list end "ape"
+	ComboBoxAudioCodecsFactorySelection insert list end "s302m"
 
 	ComboBoxAudioBitRateFactorySelection clear
 	ComboBoxAudioBitRateFactorySelection insert list end ""
@@ -1325,6 +1952,8 @@ proc InitFreeFactory {} {
 	ComboBoxAudioFileExtensionFactorySelection insert list end ".m4a"
 	ComboBoxAudioFileExtensionFactorySelection insert list end ".ogg"
 	ComboBoxAudioFileExtensionFactorySelection insert list end ".wav"
+	ComboBoxAudioFileExtensionFactorySelection insert list end ".flac"
+	ComboBoxAudioFileExtensionFactorySelection insert list end ".ape"
 
 	ComboBoxAudioTagFactorySelection clear
 	ComboBoxAudioTagFactorySelection insert list end ""
@@ -1337,15 +1966,11 @@ proc InitFreeFactory {} {
 	ComboBoxAudioChannelsFactorySelection insert list end "3"
 	ComboBoxAudioChannelsFactorySelection insert list end "6"
 
-#	ComboBoxAudioStreamIDFactorySelection clear
-#	ComboBoxAudioStreamIDFactorySelection insert list end ""
-#	ComboBoxAudioStreamIDFactorySelection insert list end "0:4"
-
-
-# Start Time Offset
-#vidopts="-ss 1 -vcodec mpeg4 -b:v 35000k -map 0:3" -- FastChannel2FCP
-# Force Format
-#audopts="-acodec mp2 -ab 160000 -f vob" -- NewsPath_Submit
+	ButtonAddLink configure -state disable
+	ButtonRemoveLink configure -state disable
+	ButtonAddEMail configure -state disable
+	ButtonUpdateEMail configure -state disable
+	ButtonRemoveEMail configure -state disable
 
 
 	ScaleProgressBarProgramFrontEnd configure  -state disabled
@@ -1358,29 +1983,48 @@ proc InitFreeFactory {} {
 ################################################################################
 ################################################################################
 proc InitVariables {} {
+	global PPref
 ##########################
 # Free Factory variables
-	global FreeFactoryDataDirectoryPath FreeFactoryDataFileName SaveFilePath DeleteSource DeleteConversionLogs EnableFactory
+	global DeleteSource DeleteConversionLogs EnableFactory
+	global FactoryDescription NotifyDirectoryEntry SelectedFactory OutputFileSuffixEntry FFMxProgram OutputDirectoryEntry
+	global FTPProgram FTPURLEntry FTPUserNameEntry FTPPasswordEntry FTPRemotePathEntry FTPTransferType FTPDeleteAfter
+	global RunFrom FactoryLinks FreeFactoryAction FactoryEnableEMail FactoryEMailNameEntry FactoryEMailAddressEntry FactoryEMailsName
+	global EnableFactoryLinking FactoryEMailsAddress FactoryEMailMessage GlobalEMailMessage
+
+	global DeleteSourceTmp DeleteConversionLogsTmp EnableFactoryTmp
+	global FactoryDescriptionTmp NotifyDirectoryEntryTmp SelectedFactoryTmp OutputFileSuffixEntryTmp FFMxProgramTmp OutputDirectoryEntryTmp
+	global FTPProgramTmp FTPURLEntryTmp FTPUserNameEntryTmp FTPPasswordEntryTmp FTPRemotePathEntryTmp FTPTransferTypeTmp FTPDeleteAfterTmp
+	global RunFromTmp FactoryLinksTmp FreeFactoryActionTmp FactoryEnableEMailTmp FactoryEMailNameEntryTmp FactoryEMailAddressEntryTmp FactoryEMailsNameTmp
+	global EnableFactoryLinkingTmp FactoryEMailsAddressTmp FactoryEMailMessageTmp
 
 ##########################
 # Video and Audio variables
-	global FactoryDescription NotifyDirectoryEntry SelectedFactory OutputFileSuffixEntry ConversionProgram OutputDirectoryEntry
-	global FTPProgram FTPURLEntry FTPUserNameEntry FTPPasswordEntry FTPRemotePathEntry FTPTransferType FTPDeleteAfter
-	global VideoCodecs VideoWrapper VideoFrameRate VideoSize VideoTarget VideoTags Threads Aspect VideoBitRate VideoPreset VideoStreamID 
+	global VideoCodecs VideoWrapper VideoFrameRate VideoSize VideoTarget VideoTags Threads Aspect VideoBitRate VideoPreset VideoStreamID
 	global GroupPicSizeEntry BFramesEntry FrameStrategyEntry StartTimeOffsetEntry ForceFormat
 	global AudioCodecs AudioBitRate AudioSampleRate AudioTag AudioChannels AudioStreamID AudioFileExtension
 
+	global VideoCodecsTmp VideoWrapperTmp VideoFrameRateTmp VideoSizeTmp VideoTargetTmp VideoTagsTmp ThreadsTmp AspectTmp VideoBitRateTmp VideoPresetTmp VideoStreamIDTmp
+	global GroupPicSizeEntryTmp BFramesEntryTmp FrameStrategyEntryTmp StartTimeOffsetEntryTmp ForceFormatTmp
+	global AudioCodecsTmp AudioBitRateTmp AudioSampleRateTmp AudioTagTmp AudioChannelsTmp AudioStreamIDTmp AudioFileExtensionTmp
+
 		set FactoryDescription ""
 		set NotifyDirectoryEntry ""
-		set OutputFileSuffixEntry ""
 		set OutputDirectoryEntry ""
+		set OutputFileSuffixEntry ""
+		set FFMxProgram $PPref(FFMxProgram)
+		set RunFrom $PPref(RunFrom)
+		set DeleteSource $PPref(DeleteSource)
+		set DeleteConversionLogs $PPref(DeleteLogs)
+		set EnableFactory $PPref(EnableFactory)
+		set FreeFactoryAction $PPref(FreeFactoryAction)
 		set FTPProgram ""
 		set FTPURLEntry ""
 		set FTPUserNameEntry ""
 		set FTPPasswordEntry ""
 		set FTPRemotePathEntry ""
-		set FTPTransferType "asc"
-		set FTPDeleteAfter "Yes"
+		set FTPTransferType $PPref(FTPTransferType)
+		set FTPDeleteAfter $PPref(FTPDeleteAfter)
 		set VideoCodecs ""
 		set VideoWrapper ""
 		set VideoFrameRate ""
@@ -1404,11 +2048,59 @@ proc InitVariables {} {
 		set AudioTag ""
 		set AudioChannels ""
 		set AudioStreamID ""
-		set SelectedFactory ""
-		set ConversionProgram ""
-		set DeleteSource "Yes"
-		set DeleteConversionLogs "No"
-		set EnableFactory 1
+		set FactoryEnableEMail $PPref(EnableEMail)
+		set FactoryEMailsName ""
+		set FactoryEMailsAddress ""
+		set FactoryEMailMessage ""
+		set EnableFactoryLinking $PPref(EnableFactoryLinking)
+		set FactoryLinks ""
+
+		set FactoryDescriptionTmp $FactoryDescription
+		set NotifyDirectoryEntryTmp $NotifyDirectoryEntry
+		set OutputDirectoryEntryTmp $OutputDirectoryEntry
+		set OutputFileSuffixEntryTmp $OutputFileSuffixEntry
+		set FFMxProgramTmp $FFMxProgram
+		set RunFromTmp $RunFrom
+		set FTPProgramTmp $FTPProgram
+		set FTPURLEntryTmp $FTPURLEntry
+		set FTPUserNameEntryTmp $FTPUserNameEntry
+		set FTPPasswordEntryTmp $FTPPasswordEntry
+		set FTPRemotePathEntryTmp $FTPRemotePathEntry
+		set FTPTransferTypeTmp $FTPTransferType
+		set FTPDeleteAfterTmp $FTPDeleteAfter
+		set VideoCodecsTmp $VideoCodecs
+		set VideoWrapperTmp $VideoWrapper
+		set VideoFrameRateTmp $VideoFrameRate
+		set VideoSizeTmp $VideoSize
+		set VideoTargetTmp $VideoTarget
+		set VideoTagsTmp $VideoTags
+		set ThreadsTmp $Threads
+		set AspectTmp $Aspect
+		set VideoBitRateTmp $VideoBitRate
+		set VideoPresetTmp $VideoPreset
+		set VideoStreamIDTmp $VideoStreamID
+		set GroupPicSizeEntryTmp $GroupPicSizeEntry
+		set BFramesEntryTmp $BFramesEntry
+		set FrameStrategyEntryTmp $FrameStrategyEntry
+		set ForceFormatTmp $ForceFormat
+		set StartTimeOffsetEntryTmp $StartTimeOffsetEntry
+		set AudioCodecsTmp $AudioCodecs
+		set AudioBitRateTmp $AudioBitRate
+		set AudioSampleRateTmp $AudioSampleRate
+		set AudioFileExtensionTmp $AudioFileExtension
+		set AudioTagTmp $AudioTag
+		set AudioChannelsTmp $AudioChannels
+		set AudioStreamIDTmp $AudioStreamID
+		set DeleteSourceTmp $DeleteSource
+		set DeleteConversionLogsTmp $DeleteConversionLogs
+		set EnableFactoryTmp $EnableFactory
+		set FreeFactoryActionTmp $FreeFactoryAction
+		set FactoryEnableEMailTmp $FactoryEnableEMail
+		set FactoryEMailsNameTmp $FactoryEMailsName
+		set FactoryEMailsAddressTmp $FactoryEMailsAddress
+		set FactoryEMailMessageTmp $FactoryEMailMessage
+		set EnableFactoryLinkingTmp $EnableFactoryLinking
+		set FactoryLinksTmp $FactoryLinks
 }
 # End InitVariables
 ################################################################################
@@ -1421,15 +2113,17 @@ proc SaveFactoryFile {} {
 
 ##########################
 # Video and Audio variables
-	global FactoryDescription NotifyDirectoryEntry SelectedFactory OutputFileSuffixEntry ConversionProgram OutputDirectoryEntry
-	global FTPProgram FTPURLEntry FTPUserNameEntry FTPPasswordEntry FTPRemotePathEntry FTPTransferType FTPDeleteAfter
-	global VideoCodecs VideoWrapper VideoFrameRate VideoSize VideoTarget VideoTags Threads Aspect VideoBitRate VideoPreset VideoStreamID 
+	global VideoCodecs VideoWrapper VideoFrameRate VideoSize VideoTarget VideoTags Threads Aspect VideoBitRate VideoPreset VideoStreamID
 	global GroupPicSizeEntry BFramesEntry FrameStrategyEntry StartTimeOffsetEntry ForceFormat
 	global AudioCodecs AudioBitRate AudioSampleRate AudioTag AudioChannels AudioStreamID AudioFileExtension
 
 ##########################
 # Free Factory variables
-	global FreeFactoryDataDirectoryPath FreeFactoryDataFileName SaveFilePath DeleteSource DeleteConversionLogs EnableFactory
+	global DeleteSource DeleteConversionLogs EnableFactory
+	global FactoryDescription NotifyDirectoryEntry SelectedFactory OutputFileSuffixEntry FFMxProgram OutputDirectoryEntry
+	global FTPProgram FTPURLEntry FTPUserNameEntry FTPPasswordEntry FTPRemotePathEntry FTPTransferType FTPDeleteAfter
+	global RunFrom FactoryLinks FreeFactoryAction FactoryEnableEMail FactoryEMailNameEntry FactoryEMailAddressEntry FactoryEMailsName
+	global EnableFactoryLinking FactoryEMailsAddress FactoryEMailMessage
 
 ##########################
 # System Control variables
@@ -1448,10 +2142,19 @@ proc SaveFactoryFile {} {
 	puts $FileHandle "NOTIFYDIRECTORY=[string trim $NotifyDirectoryEntry]"
 	puts $FileHandle "OUTPUTDIRECTORY=[string trim $OutputDirectoryEntry]"
 	puts $FileHandle "OUTPUTFILESUFFIX=[string trim $OutputFileSuffixEntry]"
-	puts $FileHandle "CONVERSIONPROGRAM=[string trim $ConversionProgram]"
+	puts $FileHandle "FFMXPROGRAM=[string trim $FFMxProgram]"
+	puts $FileHandle "RUNFROM=[string trim $RunFrom]"
 	puts $FileHandle "FTPPROGRAM=[string trim $FTPProgram]"
 	puts $FileHandle "FTPURL=[string trim $FTPURLEntry]"
 	puts $FileHandle "FTPUSERNAME=[string trim $FTPUserNameEntry]"
+# Code to encode password
+#	set PasswordChars [string length $FTPPasswordEntry]
+#	set EncodedPassword ""
+#	for {set x 0} {$x < $PasswordChars} {incr x} {
+#		set EncodedChar  [format %c [expr [scan [string index $FTPPasswordEntry $x] %c] + 128]]
+#		append EncodedPassword $EncodedChar
+#	}
+#	puts $FileHandle "FTPPASSWORD=[string trim $EncodedPassword]"
 	puts $FileHandle "FTPPASSWORD=[string trim $FTPPasswordEntry]"
 	puts $FileHandle "FTPREMOTEPATH=[string trim $FTPRemotePathEntry]"
 	puts $FileHandle "FTPTRANSFERTYPE=[string trim $FTPTransferType]"
@@ -1482,7 +2185,20 @@ proc SaveFactoryFile {} {
 	puts $FileHandle "DELETESOURCE=[string trim $DeleteSource]"
 	puts $FileHandle "DELETECONVERSIONLOGS=[string trim $DeleteConversionLogs]"
 	puts $FileHandle "ENABLEFACTORY=[string trim $EnableFactory]"
+	puts $FileHandle "FREEFRACTORYACTION=[string trim $FreeFactoryAction]"
+	puts $FileHandle "ENABLEFACTORYLINKING=[string trim $EnableFactoryLinking]"
+	puts $FileHandle "FACTORYLINKS=[string trim $FactoryLinks]"
+	puts $FileHandle "FACTORYENABLEEMAIL=[string trim $FactoryEnableEMail]"
+	puts $FileHandle "FACTORYEMAILNAME=[string trim $FactoryEMailsName]"
+	puts $FileHandle "FACTORYEMAILADDRESS=[string trim $FactoryEMailsAddress]"
+	puts $FileHandle "FACTORYEMAILMESSAGESTART="
+	if {[string trim $FactoryEMailMessage] != ""} {
+			puts $FileHandle $FactoryEMailMessage
+	}
+	puts $FileHandle "FACTORYEMAILMESSAGEEND"
 	close $FileHandle
+	set SelectedFactory ""
+	InitVariables
 	ScrolledListBoxFactoryFilesFactorySelection delete 0 end
 	foreach item [lsort [glob -nocomplain /opt/FreeFactory/Factories/*]] {
 		ScrolledListBoxFactoryFilesFactorySelection insert end [file tail $item]
@@ -1503,8 +2219,8 @@ proc SaveFactoryFile {} {
 				set FactoryValue [string trim [string range $FactoryVar [expr $EqualDelimiter + 1] end]]
 				switch $FactoryField {
 					"ENABLEFACTORY" {
-						if {$FactoryValue != 1} {
-							ScrolledListBoxFactoryFilesFactorySelection itemconfigure end -background #cccccc
+						if {$FactoryValue != "Yes"} {
+							ScrolledListBoxFactoryFilesFactorySelection itemconfigure end -background #efefef
 						}
 					}
 				}
@@ -1524,15 +2240,17 @@ proc DeleteFactoryFile {} {
 
 ##########################
 # Video and Audio variables
-	global FactoryDescription NotifyDirectoryEntry SelectedFactory OutputFileSuffixEntry ConversionProgram OutputDirectoryEntry
-	global FTPProgram FTPURLEntry FTPUserNameEntry FTPPasswordEntry FTPRemotePathEntry FTPTransferType FTPDeleteAfter
-	global VideoCodecs VideoWrapper VideoFrameRate VideoSize VideoTarget VideoTags Threads Aspect VideoBitRate VideoPreset VideoStreamID 
+	global VideoCodecs VideoWrapper VideoFrameRate VideoSize VideoTarget VideoTags Threads Aspect VideoBitRate VideoPreset VideoStreamID
 	global GroupPicSizeEntry BFramesEntry FrameStrategyEntry StartTimeOffsetEntry ForceFormat
 	global AudioCodecs AudioBitRate AudioSampleRate AudioTag AudioChannels AudioStreamID AudioFileExtension
 
 ##########################
 # Free Factory variables
-	global FreeFactoryDataDirectoryPath FreeFactoryDataFileName SaveFilePath DeleteSource DeleteConversionLogs EnableFactory
+	global DeleteSource DeleteConversionLogs EnableFactory
+	global FactoryDescription NotifyDirectoryEntry SelectedFactory OutputFileSuffixEntry FFMxProgram OutputDirectoryEntry
+	global FTPProgram FTPURLEntry FTPUserNameEntry FTPPasswordEntry FTPRemotePathEntry FTPTransferType FTPDeleteAfter
+	global RunFrom FactoryLinks FreeFactoryAction FactoryEnableEMail FactoryEMailNameEntry FactoryEMailAddressEntry FactoryEMailsName
+	global EnableFactoryLinking FactoryEMailsAddress FactoryEMailMessage
 
 ##########################
 # System Control variables
@@ -1589,7 +2307,5 @@ proc DeleteFactoryFile {} {
 		}
 }
 # End DeleteFactoryFile
-################################################################################
-################################################################################
 ################################################################################
 ################################################################################

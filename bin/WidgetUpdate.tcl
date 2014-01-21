@@ -88,11 +88,11 @@ proc {widgetUpdate} {} {
 
 	set HierarchyConfigIWidgets "configure -foreground $PPref(color,window,fore) -background $PPref(color,window,back) -font $PPref(fonts,label) -textbackground $PPref(color,widget,back) -labelfont $PPref(fonts,label) -textfont $PPref(fonts,text)"
 
-
 	if {[winfo exists .programFrontEnd] && ![winfo exists .fileDialog] && ![winfo exists .genericConfirm] && ![winfo exist .settings] && ![winfo exist .showAbout] && ![winfo exist .showLicense]} {
 		.programFrontEnd configure -background $PPref(color,window,back)
 		MenuMasterProgramFrontEnd $MenuConfig
 		Menu1ProgramFrontEnd $MenuConfig
+		Menu3ProgramFrontEnd $MenuConfig
 		Menu7ProgramFrontEnd $MenuConfig
 		Menu9ProgramFrontEnd $MenuConfig
 		FrameTopMaster $FrameConfig
@@ -116,9 +116,9 @@ proc {widgetUpdate} {} {
 		FrameReadOnlyFactorySelection $FrameConfig
 		ButtonReadOnlyFactorySelection $ButtonConfig1
 		FrameRight $FrameConfig
+		LabeledFrameFactoryOptions $LabeledFrameConfig
 		FactoryDescriptionEntry $EntryConfigIWidgets
 		FrameNotifyDirectory $FrameConfig
-#		NotifyDirectoryEntry $EntryConfigIWidgets
 		ComboBoxNotifyDirectoryFactorySelection $ComboBoxConfigIWidgets
 		ButtonGetNotifyDirectorySelection $ButtonConfig1
 		FrameOutputDirectory $FrameConfig
@@ -126,7 +126,17 @@ proc {widgetUpdate} {} {
 		ButtonGetOutputDirectory $ButtonConfig1
 		FrameOutputFileSuffix $FrameConfig
 		OutputFileSuffixEntry $EntryConfigIWidgets
-		ComboBoxConversionProgramFactorySelection $ComboBoxConfigIWidgets
+		ComboBoxFFMxProgramFactorySelection $ComboBoxConfigIWidgets
+		LabelRunFrom $LabelConfig1
+		RadioButtonRunFromOpt $RadioButtonConfig1
+		RadioButtonRunFromUSR $RadioButtonConfig1
+		FrameEnableFactory $FrameConfig
+		CheckButtonEnableFactory $CheckButtonConfig1
+		CheckButtonRemoveLogs $CheckButtonConfig1
+		CheckButtonRemoveSource $CheckButtonConfig1
+		LabelFreeFactoryAction $LabelConfig1
+		RadioButtonFreeFactoryActionCopy $RadioButtonConfig1
+		RadioButtonFreeFactoryActionEncode $RadioButtonConfig1
 		LabeledFrameFTPOptions $LabeledFrameConfig
 		FrameFTPProgram $FrameConfig
 		ComboBoxFTPProgramFactorySelection $ComboBoxConfigIWidgets
@@ -138,9 +148,7 @@ proc {widgetUpdate} {} {
 		LabelFTPTransferType $LabelConfig1
 		RadioButtonFTPTransferTypeASC $RadioButtonConfig1
 		RadioButtonFTPTransferTypeBIN $RadioButtonConfig1
-		LabelFTPDeleteAfter $LabelConfig1
-		RadioButtonFTPDeleteAfterYes $RadioButtonConfig1
-		RadioButtonFTPDeleteAfterNo $RadioButtonConfig1
+		CheckButtonFTPDeleteAfter $RadioButtonConfig1
 		LabeledFrameVideoOptions $LabeledFrameConfig
 		FrameVideoCodecsWrapper $FrameConfig
 		ComboBoxVideoCodecsFactorySelection $ComboBoxConfigIWidgets
@@ -173,14 +181,27 @@ proc {widgetUpdate} {} {
 		ComboBoxAudioTagFactorySelection $ComboBoxConfigIWidgets
 		ComboBoxAudioChannelsFactorySelection $ComboBoxConfigIWidgets
 		EntryAudioStreamIDFactorySelection $EntryConfigIWidgets
-		LabeledFrameOtherFactoryOptions $LabeledFrameConfig
-		CheckButtonEnableFactory $CheckButtonConfig1
-		LabelDeleteSource $LabelConfig1
-		RadioButtonDeleteSourceYes $RadioButtonConfig1
-		RadioButtonDeleteSourceNo $RadioButtonConfig1
-		LabelDeleteLog $LabelConfig1
-		RadioButtonDeleteConversionLogsYes $RadioButtonConfig1
-		RadioButtonDeleteConversionLogsNo $RadioButtonConfig1
+		FrameEMailAndLink $FrameConfig
+		LabeledFrameFactoryEmail $LabeledFrameConfig
+		FrameEMailEnable $FrameConfig
+		CheckButtonEnableFactoryEMail $CheckButtonConfig1
+		ButtonAddFactoryEMailMessage $ButtonConfig1
+		EntryFactoryEMailName $EntryConfigIWidgets
+		EntryFactoryEMailAddress $EntryConfigIWidgets
+		ScrolledListBoxFactoryEMail $ScrolledListBoxConfigIWidgets
+		FrameFactoryEMailButton $FrameConfig
+		ButtonNewEMail $ButtonConfig1
+		ButtonAddEMail $ButtonConfig1
+		ButtonUpdateEMail $ButtonConfig1
+		ButtonRemoveEMail $ButtonConfig1
+		LabeledFrameFactoryLinking $LabeledFrameConfig
+		CheckButtonEnableFactoryLinking $CheckButtonConfig1
+		ComboBoxLinkedFactory $ComboBoxConfigIWidgets
+		EntryLabelLinkedFactories $EntryConfigLabelIWidgets
+		ScrolledListBoxFactoryLinking $ScrolledListBoxConfigIWidgets
+		FrameFactoryLinkingButton $FrameConfig
+		ButtonAddLink $ButtonConfig1
+		ButtonRemoveLink $ButtonConfig1
 		FrameFooterMaster $FrameConfig
 		FrameFooterTime $FrameConfig
 		EntrySolutionStatusProgramFrontEnd $EntryConfigLabel
@@ -189,6 +210,17 @@ proc {widgetUpdate} {} {
 		EntrySystemTimeProgramFrontEnd $EntryConfigLabel
 	}
 
+	if {[winfo exists .freeFactoryViewLogs]} {
+		.freeFactoryViewLogs configure -background $PPref(color,window,back)
+		LabeledFrameViewFreeFactoryLogs $LabeledFrameConfig
+		FrameListLogs $FrameConfig
+		ScrolledListBoxLogs $ScrolledListBoxConfigIWidgets
+		FrameListLogsButton $FrameConfig
+		ButtonRefreshLog $ButtonConfig1
+		ButtonRemoveLog $ButtonConfig1
+		ScrolledTextLog $ScrolledTextBoxConfig
+		ButtonCloseFreeFactoryViewLogs $ButtonConfig1
+	}
 	if {[winfo exists .fileDialog]} {
 		FrameTopFileDialog $FrameConfig
 		LabelLookInFileDialog $LabelConfig1
@@ -465,10 +497,6 @@ proc {widgetUpdate} {} {
 		LabeledFrameWeekSettings $LabeledFrameConfig
 		CheckButtonDayOfTheWeekSettings $CheckButtonConfig1
 		EntryTimeSystemSettings $EntryConfigIWidgets
-		LabeledFrameSelectionCompanyInfoSettings $LabeledFrameConfig
-		CompanyNameSettingsEntry $EntryConfigIWidgets
-		LabeledFrameFreeFactoryOptionsSettings $LabeledFrameConfig
-		AppleDelaySettingsEntry $EntryConfigIWidgets
 		ComboBoxNotifyRuntimeUserSettings $ComboBoxConfigIWidgets
 		LabeledFrameFreeFactoryNotifyDirectoriesSettings $LabeledFrameConfig
 		ScrolledListBoxFactoryNotifyDirectories $ScrolledListBoxConfigIWidgets
@@ -489,6 +517,44 @@ proc {widgetUpdate} {} {
 		ButtonRestartNotifyFreeFactory $ButtonConfig1
 		ButtonStopNotifyFreeFactory $ButtonConfig1
 		ButtonKillNotifyFreeFactory $ButtonConfig1
+		LabeledFrameSelectionCompanyInfoSettings $LabeledFrameConfig
+		CompanyNameSettingsEntry $EntryConfigIWidgets
+		LabeledFrameFreeFactoryOptionsSettings $LabeledFrameConfig
+		AppleDelaySettingsEntry $EntryConfigIWidgets
+		LabeledFrameUserDefaultsSettings $LabeledFrameConfig
+		FrameRadioButtonUserDefault1 $FrameConfig
+		LabelFFMxProgramSettings $LabelConfig1
+		RadioButtonFFMxProgramFFMPEGSettings $RadioButtonConfig1
+		RadioButtonFFMxProgramFFMBCSettings $RadioButtonConfig1
+		FrameRadioButtonUserDefault2 $FrameConfig
+		LabelRunFromSettings $LabelConfig1
+		RadioButtonRunFromUSRSettings $RadioButtonConfig1
+		RadioButtonRunFromOptSettings $RadioButtonConfig1
+		CheckButtonEnableFactorySettings $CheckButtonConfig1
+		CheckButtonRemoveSourceSettings $CheckButtonConfig1
+		CheckButtonRemoveLogsSettings $CheckButtonConfig1
+		FrameRadioButtonUserDefault3 $FrameConfig
+		LabelFTPTransferTypeSettings $LabelConfig1
+		RadioButtonFTPTransferTypeASCSettings $RadioButtonConfig1
+		RadioButtonFTPTransferTypeBINSettings $RadioButtonConfig1
+		CheckButtonFTPDeleteAfterSettings $RadioButtonConfig1
+		CheckButtonEnableEMailSettings $CheckButtonConfig1
+		CheckButtonEnableFactoryLinkingSettings $CheckButtonConfig1
+		FrameRadioButtonUserDefault8 $FrameConfig
+		LabelFreeFactoryActionSettingsSettings $LabelConfig1
+		RadioButtonFreeFactoryActionSettingsCopySettings $RadioButtonConfig1
+		RadioButtonFreeFactoryActionSettingsEncodeSettings $RadioButtonConfig1
+		LabeledFrameEmailSettings $LabeledFrameConfig
+		SMTPEMailServerEntry $EntryConfigIWidgets
+		EMailPortEntry $EntryConfigIWidgets
+		EMailUserNameEntry $EntryConfigIWidgets
+		EMailPasswordEntry $EntryConfigIWidgets
+		FrameEMailTLS $FrameConfig
+		LabelEMailTLSSettings $LabelConfig1
+		RadioButtonEMailTLSYesSettings $RadioButtonConfig1
+		RadioButtonEMailTLSNoSettings $RadioButtonConfig1
+		EMailFromNameEntry $EntryConfigIWidgets
+		EMailFromAddressEntry $EntryConfigIWidgets
 		LabeledFrameFilePathSettings $LabeledFrameConfig
 		FramePDFReaderPath $FrameConfig
 		PDFReaderPathSettingsEntry $EntryConfigIWidgets

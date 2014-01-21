@@ -41,8 +41,12 @@ proc vTclWindow.settings {base} {
 	global TheCompanyName
 
 ##########################
-# Free Factory Variables
-	global AppleDelay NumberOfFFProcesses FFProcessList SelectedDirectoryPath NotifyDirectoryList NumberOfDirectories NotifyRuntimeUser ScrollBoxItemPos ShowProcess
+# Free Factory variables
+	global FreeFactoryDataDirectoryPath FreeFactoryDataFileName SaveFilePath DeleteSource DeleteConversionLogs EnableFactory
+	global FactoryDescription NotifyDirectoryEntry SelectedFactory OutputFileSuffixEntry FFMxProgram OutputDirectoryEntry
+	global FTPProgram FTPURLEntry FTPUserNameEntry FTPPasswordEntry FTPRemotePathEntry FTPTransferType FTPDeleteAfter
+	global RunFrom FactoryLinks FreeFactoryAction FactoryEnableEMail FactoryEMailNameEntry FactoryEMailAddressEntry FactoryEMailsName
+	global FactoryEMailsAddress FactoryEMailMessage GlobalEMailMessage
 
 ##########################
 # Settings Variables
@@ -83,10 +87,11 @@ proc vTclWindow.settings {base} {
     bind $top <Escape> {destroy window .settings}
     bind $top <Control-Right> {.settings.settingsTabNotebook next}
     bind $top <Control-Left> {.settings.settingsTabNotebook prev}
+    bind $top <F1> {exec $PPref(PDFReaderPath) "/opt/FreeFactory/Docs/Documentation.pdf" &}
 
-#    bind $top <ButtonRelease-3> {
-#	tk_messageBox -message %W
-#	}
+    bind $top <ButtonRelease-3> {
+	tk_messageBox -message %W
+	}
 
 	::iwidgets::tabnotebook $top.settingsTabNotebook -angle 0 -height 600 -raiseselect 1 -tabborders 1 \
 	-tabforeground Black -tabpos n -width 250 -borderwidth 0
@@ -94,6 +99,7 @@ proc vTclWindow.settings {base} {
 
 	$top.settingsTabNotebook add -command {} -disabledforeground #a3a3a3 -label "Display"
 	$top.settingsTabNotebook add -command {} -disabledforeground #a3a3a3 -label "Date/Time"
+	$top.settingsTabNotebook add -command {} -disabledforeground #a3a3a3 -label "Notification"
 	$top.settingsTabNotebook add -command {} -disabledforeground #a3a3a3 -label "Free Factory"
 	$top.settingsTabNotebook add -command {} -disabledforeground #a3a3a3 -label "Misc"
 
@@ -736,59 +742,6 @@ proc vTclWindow.settings {base} {
 
 	set site_8_6 [lindex [$top.settingsTabNotebook childsite] 2]
 
-
-	::iwidgets::labeledframe $site_8_6.selectionCompanyInfoFrame -labelpos nw -labeltext "Company Information"
-	vTcl:DefineAlias "$site_8_6.selectionCompanyInfoFrame" "LabeledFrameSelectionCompanyInfoSettings" vTcl:WidgetProc "Toplevel1" 1
-
-	set site_8_6_0 [$site_8_6.selectionCompanyInfoFrame childsite]
-
-	::iwidgets::entryfield $site_8_6_0.nameCompanyEntry -borderwidth 2  -relief sunken -labelpos w \
-	-labeltext "Company Name" -textvariable TheCompanyName -width 35
-	set BindWidget "$site_8_6_0.nameCompanyEntry"
-	set BindWidgetEntry "$site_8_6_0.nameCompanyEntry.lwchildsite.entry"
-	vTcl:DefineAlias "$BindWidget" "CompanyNameSettingsEntry" vTcl:WidgetProc "Toplevel1" 1
-	vTcl:DefineAlias "$BindWidgetEntry" "EntryCompanyNameSettingsChild" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_8_6_0.nameCompanyEntry -in $site_8_6_0 -anchor nw -expand 0 -fill none -side top
-	bind $BindWidgetEntry <FocusIn> {
-		if {$PPref(SelectAllText) == "Yes"} {EntryCompanyNameSettingsChild select range 0 end}
-		CompanyNameSettingsEntry icursor end
-	}
-	bind $BindWidgetEntry <FocusOut> {CheckForSettingsApplyEnable}
-	bind $BindWidgetEntry <Key-Return> {}
-	bind $BindWidgetEntry <Key-KP_Enter> {}
-	bind $BindWidgetEntry <Control-Down> {}
-	bind $BindWidgetEntry <Control-Up> {}
-	bind $BindWidgetEntry <Control-Left> {}
-	bind $BindWidgetEntry <Control-Right> {}
-
- 	pack $site_8_6.selectionCompanyInfoFrame -in $site_8_6 -anchor center -expand 1 -fill x -side top
-
-	::iwidgets::labeledframe $site_8_6.freeFactoryOptionsFrame -labelpos nw -labeltext "Free Factory Options"
-	vTcl:DefineAlias "$site_8_6.freeFactoryOptionsFrame" "LabeledFrameFreeFactoryOptionsSettings" vTcl:WidgetProc "Toplevel1" 1
-
-	set site_8_6_0 [$site_8_6.freeFactoryOptionsFrame childsite]
-
-	::iwidgets::entryfield $site_8_6_0.appleDelayEntry -borderwidth 2  -relief sunken -labelpos w \
-	-labeltext "Apple Delay" -justify right -textvariable AppleDelay -width 5
-	set BindWidget "$site_8_6_0.appleDelayEntry"
-	set BindWidgetEntry "$site_8_6_0.appleDelayEntry.lwchildsite.entry"
-	vTcl:DefineAlias "$BindWidget" "AppleDelaySettingsEntry" vTcl:WidgetProc "Toplevel1" 1
-	vTcl:DefineAlias "$BindWidgetEntry" "EntryAppleDelaySettingsChild" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_8_6_0.appleDelayEntry -in $site_8_6_0 -anchor nw -expand 0 -fill none -side top
-	bind $BindWidgetEntry <FocusIn> {
-		if {$PPref(SelectAllText) == "Yes"} {EntryAppleDelaySettingsChild select range 0 end}
-		CompanyNameSettingsEntry icursor end
-	}
-	bind $BindWidgetEntry <FocusOut> {CheckForSettingsApplyEnable}
-	bind $BindWidgetEntry <Key-Return> {}
-	bind $BindWidgetEntry <Key-KP_Enter> {}
-	bind $BindWidgetEntry <Control-Down> {}
-	bind $BindWidgetEntry <Control-Up> {}
-	bind $BindWidgetEntry <Control-Left> {}
-	bind $BindWidgetEntry <Control-Right> {}
-
- 	pack $site_8_6.freeFactoryOptionsFrame -in $site_8_6 -anchor center -expand 1 -fill x -side top
-
 	::iwidgets::labeledframe $site_8_6.freeFactoryNotifyDirectoriesFrame -labelpos nw -labeltext "Free Factory Notify Directories"
 	vTcl:DefineAlias "$site_8_6.freeFactoryNotifyDirectoriesFrame" "LabeledFrameFreeFactoryNotifyDirectoriesSettings" vTcl:WidgetProc "Toplevel1" 1
 
@@ -1079,10 +1032,10 @@ proc vTclWindow.settings {base} {
         bind $BindWidgetEntry <Key-Return> {}
         bind $BindWidgetEntry <Key-KP_Enter> {}
 
-	frame $site_8_6_3.runningFFProcessesRadioButtonFrame -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
-	vTcl:DefineAlias "$site_8_6_3.runningFFProcessesRadioButtonFrame" "RadioButtonFrameRunningFFProcesses" vTcl:WidgetProc "Toplevel1" 1
+	frame $site_8_6_3.runningFFProcessesFrameRadioButton -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
+	vTcl:DefineAlias "$site_8_6_3.runningFFProcessesFrameRadioButton" "FrameRadioButtonRunningFFProcesses" vTcl:WidgetProc "Toplevel1" 1
 
-	set site_8_6_3_0 $site_8_6_3.runningFFProcessesRadioButtonFrame
+	set site_8_6_3_0 $site_8_6_3.runningFFProcessesFrameRadioButton
 
 	radiobutton $site_8_6_3_0.userProcessesRadioButton \
 	-command {
@@ -1098,7 +1051,7 @@ proc vTclWindow.settings {base} {
 	vTcl:DefineAlias "$site_8_6_3_0.allProcessesRadioButton" "RadioButtonAllProcessSettings" vTcl:WidgetProc "Toplevel1" 1
 	pack $site_8_6_3_0.allProcessesRadioButton -in $site_8_6_3_0 -anchor nw -expand 0 -fill none -side left
 
-	pack $site_8_6_3.runningFFProcessesRadioButtonFrame -in $site_8_6_3 -anchor w -expand 1 -fill x -side top
+	pack $site_8_6_3.runningFFProcessesFrameRadioButton -in $site_8_6_3 -anchor w -expand 1 -fill x -side top
 
 	frame $site_8_6_3.runningFFProcessesButtonFrame -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
 	vTcl:DefineAlias "$site_8_6_3.runningFFProcessesButtonFrame" "ButtonFrameRunningFFProcesses" vTcl:WidgetProc "Toplevel1" 1
@@ -1162,29 +1115,343 @@ proc vTclWindow.settings {base} {
 #############################################################################
 	set site_8_7 [lindex [$top.settingsTabNotebook childsite] 3]
 
-	::iwidgets::labeledframe $site_8_7.filePathFrame -labelpos nw -labeltext "File Paths"
-	vTcl:DefineAlias "$site_8_7.filePathFrame" "LabeledFrameFilePathSettings" vTcl:WidgetProc "Toplevel1" 1
+	::iwidgets::labeledframe $site_8_7.selectionCompanyInfoFrame -labelpos nw -labeltext "Company Information"
+	vTcl:DefineAlias "$site_8_7.selectionCompanyInfoFrame" "LabeledFrameSelectionCompanyInfoSettings" vTcl:WidgetProc "Toplevel1" 1
 
-	set site_8_7_0 [$site_8_7.filePathFrame childsite]
+	set site_8_7_0 [$site_8_7.selectionCompanyInfoFrame childsite]
 
-	frame $site_8_7_0.framePDFReaderPath -height 2 -highlightcolor black -relief flat -width 12  -border 0
-	vTcl:DefineAlias "$site_8_7_0.framePDFReaderPath" "FramePDFReaderPath" vTcl:WidgetProc "Toplevel1" 1
+	::iwidgets::entryfield $site_8_7_0.nameCompanyEntry -borderwidth 2  -relief sunken -labelpos w \
+	-labeltext "Company Name" -textvariable PPref(TheCompanyName) -width 35
+	set BindWidget "$site_8_7_0.nameCompanyEntry"
+	set BindWidgetEntry "$site_8_7_0.nameCompanyEntry.lwchildsite.entry"
+	vTcl:DefineAlias "$BindWidget" "CompanyNameSettingsEntry" vTcl:WidgetProc "Toplevel1" 1
+	vTcl:DefineAlias "$BindWidgetEntry" "EntryCompanyNameSettingsChild" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_0.nameCompanyEntry -in $site_8_7_0 -anchor nw -expand 0 -fill none -side top
+	bind $BindWidgetEntry <FocusIn> {
+		if {$PPref(SelectAllText) == "Yes"} {EntryCompanyNameSettingsChild select range 0 end}
+			CompanyNameSettingsEntry icursor end
+	}
+	bind $BindWidgetEntry <FocusOut> {CheckForSettingsApplyEnable}
+	bind $BindWidgetEntry <Key-Return> {}
+	bind $BindWidgetEntry <Key-KP_Enter> {}
+	bind $BindWidgetEntry <Control-Down> {}
+	bind $BindWidgetEntry <Control-Up> {}
+	bind $BindWidgetEntry <Control-Left> {}
+	bind $BindWidgetEntry <Control-Right> {}
 
-	set site_8_7_0_1 $site_8_7_0.framePDFReaderPath
+ 	pack $site_8_7.selectionCompanyInfoFrame -in $site_8_7 -anchor center -expand 1 -fill x -side top
 
-	::iwidgets::entryfield $site_8_7_0_1.pdfReaderPathEntry -borderwidth 2  -relief sunken -labelpos w \
+	::iwidgets::labeledframe $site_8_7.freeFactoryOptionsFrame -labelpos nw -labeltext "Free Factory Options"
+	vTcl:DefineAlias "$site_8_7.freeFactoryOptionsFrame" "LabeledFrameFreeFactoryOptionsSettings" vTcl:WidgetProc "Toplevel1" 1
+
+	set site_8_7_0 [$site_8_7.freeFactoryOptionsFrame childsite]
+
+	::iwidgets::entryfield $site_8_7_0.appleDelayEntry -borderwidth 2  -relief sunken -labelpos w \
+	-labeltext "Apple Delay" -justify right -textvariable PPref(AppleDelay) -width 5
+	set BindWidget "$site_8_7_0.appleDelayEntry"
+	set BindWidgetEntry "$site_8_7_0.appleDelayEntry.lwchildsite.entry"
+	vTcl:DefineAlias "$BindWidget" "AppleDelaySettingsEntry" vTcl:WidgetProc "Toplevel1" 1
+	vTcl:DefineAlias "$BindWidgetEntry" "EntryAppleDelaySettingsChild" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_0.appleDelayEntry -in $site_8_7_0 -anchor nw -expand 0 -fill none -side top
+	bind $BindWidgetEntry <FocusIn> {
+		if {$PPref(SelectAllText) == "Yes"} {EntryAppleDelaySettingsChild select range 0 end}
+			AppleDelaySettingsEntry icursor end
+	}
+	bind $BindWidgetEntry <FocusOut> {CheckForSettingsApplyEnable}
+	bind $BindWidgetEntry <Key-Return> {}
+	bind $BindWidgetEntry <Key-KP_Enter> {}
+	bind $BindWidgetEntry <Control-Down> {}
+	bind $BindWidgetEntry <Control-Up> {}
+	bind $BindWidgetEntry <Control-Left> {}
+	bind $BindWidgetEntry <Control-Right> {}
+
+	::iwidgets::labeledframe $site_8_7_0.userDefaultsFrame -labelpos nw -labeltext "User Defaults"
+	vTcl:DefineAlias "$site_8_7_0.userDefaultsFrame" "LabeledFrameUserDefaultsSettings" vTcl:WidgetProc "Toplevel1" 1
+
+	set site_8_7_1 [$site_8_7_0.userDefaultsFrame childsite]
+
+	frame $site_8_7_1.userDefault1ButtonFrame -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
+	vTcl:DefineAlias "$site_8_7_1.userDefault1ButtonFrame" "FrameRadioButtonUserDefault1" vTcl:WidgetProc "Toplevel1" 1
+
+	set site_8_7_2 $site_8_7_1.userDefault1ButtonFrame
+
+	label $site_8_7_2.fFMxProgramLabelSettings -text "FFMx Program" -background #ececec
+	vTcl:DefineAlias "$site_8_7_2.fFMxProgramLabelSettings" "LabelFFMxProgramSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_2.fFMxProgramLabelSettings -in $site_8_7_2 -anchor e -expand 0 -padx 2 -fill none -side left
+
+	radiobutton $site_8_7_2.fFMxProgramFFMPEGRadioButtonSettings \
+	-command {CheckForSettingsApplyEnable} -text ffmpeg -value "ffmpeg" -variable PPref(FFMxProgram)
+	vTcl:DefineAlias "$site_8_7_2.fFMxProgramFFMPEGRadioButtonSettings" "RadioButtonFFMxProgramFFMPEGSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_2.fFMxProgramFFMPEGRadioButtonSettings -in $site_8_7_2 -anchor e -expand 0 -fill none -side left
+
+	radiobutton $site_8_7_2.fFMxProgramFFMBCRadioButtonSettings \
+	-command {CheckForSettingsApplyEnable} -text ffmbc -value "ffmbc" -variable PPref(FFMxProgram)
+	vTcl:DefineAlias "$site_8_7_2.fFMxProgramFFMBCRadioButtonSettings" "RadioButtonFFMxProgramFFMBCSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_2.fFMxProgramFFMBCRadioButtonSettings -in $site_8_7_2 -anchor e -expand 0 -fill none -side left
+
+	pack $site_8_7_1.userDefault1ButtonFrame -in $site_8_7_1 -anchor nw -expand 0 -fill none -side top
+
+	frame $site_8_7_1.userDefault2ButtonFrame -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
+	vTcl:DefineAlias "$site_8_7_1.userDefault2ButtonFrame" "FrameRadioButtonUserDefault2" vTcl:WidgetProc "Toplevel1" 1
+
+	set site_8_7_2 $site_8_7_1.userDefault2ButtonFrame
+
+	label $site_8_7_2.runFromLabelSettings -text "Run From" -background #ececec
+	vTcl:DefineAlias "$site_8_7_2.runFromLabelSettings" "LabelRunFromSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_2.runFromLabelSettings -in $site_8_7_2 -anchor e -expand 0 -padx 2 -fill none -side left
+
+	radiobutton $site_8_7_2.runFromUSRRadioButtonSettings \
+	-command {CheckForSettingsApplyEnable} -text "/usr/bin/" -value "usr" -variable PPref(RunFrom)
+	vTcl:DefineAlias "$site_8_7_2.runFromUSRRadioButtonSettings" "RadioButtonRunFromUSRSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_2.runFromUSRRadioButtonSettings -in $site_8_7_2 -anchor e -expand 0 -fill none -side left
+
+	radiobutton $site_8_7_2.runFromOptRadioButtonSettings \
+	-command {CheckForSettingsApplyEnable} -text "/opt/FreeFactory/bin/" -value "opt" -variable PPref(RunFrom)
+	vTcl:DefineAlias "$site_8_7_2.runFromOptRadioButtonSettings" "RadioButtonRunFromOptSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_2.runFromOptRadioButtonSettings -in $site_8_7_2 -anchor e -expand 0 -fill none -side left
+
+	pack $site_8_7_1.userDefault2ButtonFrame -in $site_8_7_1 -anchor nw -expand 0 -fill none -side top
+
+	checkbutton $site_8_7_1.enableFactoryCheckBoxSettings -command {CheckForSettingsApplyEnable} -offvalue 0 -onvalue 1  -text "Enable Factory" -variable PPref(EnableFactory)
+	vTcl:DefineAlias "$site_8_7_1.enableFactoryCheckBoxSettings" "CheckButtonEnableFactorySettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_1.enableFactoryCheckBoxSettings -in $site_8_7_1 -anchor nw -expand 0 -padx 0 -fill none -side top
+
+	checkbutton $site_8_7_1.removeSourceCheckBoxSettings -command {CheckForSettingsApplyEnable} -offvalue "No" -onvalue "Yes"  -text "Remove Source" -variable PPref(DeleteSource)
+	vTcl:DefineAlias "$site_8_7_1.removeSourceCheckBoxSettings" "CheckButtonRemoveSourceSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_1.removeSourceCheckBoxSettings -in $site_8_7_1 -anchor nw -expand 0 -padx 0 -fill none -side top
+
+	checkbutton $site_8_7_1.removeLogsCheckBoxSettings -command {CheckForSettingsApplyEnable} -offvalue "No" -onvalue "Yes"  -text "Remove Logs" -variable PPref(DeleteLogs)
+	vTcl:DefineAlias "$site_8_7_1.removeLogsCheckBoxSettings" "CheckButtonRemoveLogsSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_1.removeLogsCheckBoxSettings -in $site_8_7_1 -anchor nw -expand 0 -padx 0 -fill none -side top
+
+	frame $site_8_7_1.userDefault8ButtonFrame -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
+	vTcl:DefineAlias "$site_8_7_1.userDefault8ButtonFrame" "FrameRadioButtonUserDefault8" vTcl:WidgetProc "Toplevel1" 1
+
+	set site_8_7_2 $site_8_7_1.userDefault8ButtonFrame
+
+	label $site_8_7_2.freeFactoryActionSettingsLabelSettings -text "Action" -background #ececec
+	vTcl:DefineAlias "$site_8_7_2.freeFactoryActionSettingsLabelSettings" "LabelFreeFactoryActionSettingsSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_2.freeFactoryActionSettingsLabelSettings -in $site_8_7_2 -anchor e -expand 0 -padx 2 -fill none -side left
+
+	radiobutton $site_8_7_2.freeFactoryActionSettingsEncodeRadioButtonSettings \
+	-command {CheckForSettingsApplyEnable} -text "Encode" -value "Encode" -variable PPref(FreeFactoryAction)
+	vTcl:DefineAlias "$site_8_7_2.freeFactoryActionSettingsEncodeRadioButtonSettings" "RadioButtonFreeFactoryActionSettingsEncodeSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_2.freeFactoryActionSettingsEncodeRadioButtonSettings -in $site_8_7_2 -anchor e -expand 0 -fill none -side left
+
+	radiobutton $site_8_7_2.freeFactoryActionSettingsCopyRadioButtonSettings \
+	-command {CheckForSettingsApplyEnable} -text "Copy" -value "Copy" -variable PPref(FreeFactoryAction)
+	vTcl:DefineAlias "$site_8_7_2.freeFactoryActionSettingsCopyRadioButtonSettings" "RadioButtonFreeFactoryActionSettingsCopySettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_2.freeFactoryActionSettingsCopyRadioButtonSettings -in $site_8_7_2 -anchor e -expand 0 -fill none -side left
+
+	pack $site_8_7_1.userDefault8ButtonFrame -in $site_8_7_1 -anchor nw -expand 0 -fill none -side top
+
+	frame $site_8_7_1.userDefault3ButtonFrame -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
+	vTcl:DefineAlias "$site_8_7_1.userDefault3ButtonFrame" "FrameRadioButtonUserDefault3" vTcl:WidgetProc "Toplevel1" 1
+
+	set site_8_7_2 $site_8_7_1.userDefault3ButtonFrame
+
+	label $site_8_7_2.ftpTransferTypeLabelSettings -text "FTP Transfer Type" -background #ececec
+	vTcl:DefineAlias "$site_8_7_2.ftpTransferTypeLabelSettings" "LabelFTPTransferTypeSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_2.ftpTransferTypeLabelSettings -in $site_8_7_2 -anchor e -expand 0 -padx 2 -fill none -side left
+
+	radiobutton $site_8_7_2.ftpTransferTypeASCRadioButtonSettings \
+	-command {CheckForSettingsApplyEnable} -text "ASCII" -value "asc" -variable PPref(FTPTransferType)
+	vTcl:DefineAlias "$site_8_7_2.ftpTransferTypeASCRadioButtonSettings" "RadioButtonFTPTransferTypeASCSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_2.ftpTransferTypeASCRadioButtonSettings -in $site_8_7_2 -anchor e -expand 0 -fill none -side left
+
+	radiobutton $site_8_7_2.ftpTransferTypeBINRadioButtonSettings \
+	-command {CheckForSettingsApplyEnable} -text "Binary" -value "bin" -variable PPref(FTPTransferType)
+	vTcl:DefineAlias "$site_8_7_2.ftpTransferTypeBINRadioButtonSettings" "RadioButtonFTPTransferTypeBINSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_2.ftpTransferTypeBINRadioButtonSettings -in $site_8_7_2 -anchor e -expand 0 -fill none -side left
+
+	pack $site_8_7_1.userDefault3ButtonFrame -in $site_8_7_1 -anchor nw -expand 0 -fill none -side top
+
+	checkbutton $site_8_7_1.ftpDeleteAfterCheckBoxSettings -command {CheckForSettingsApplyEnable} -offvalue "No" -onvalue "Yes"  -text "Remove Output File After FTP" -variable PPref(FTPDeleteAfter)
+	vTcl:DefineAlias "$site_8_7_1.ftpDeleteAfterCheckBoxSettings" "CheckButtonFTPDeleteAfterSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_1.ftpDeleteAfterCheckBoxSettings -in $site_8_7_1 -anchor nw -expand 0 -padx 0 -fill none -side top
+
+	checkbutton $site_8_7_1.enableEMailCheckBoxSettings -command {CheckForSettingsApplyEnable} -offvalue "No" -onvalue "Yes"  -text "Enable EMail" -variable PPref(EnableEMail)
+	vTcl:DefineAlias "$site_8_7_1.enableEMailCheckBoxSettings" "CheckButtonEnableEMailSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_1.enableEMailCheckBoxSettings -in $site_8_7_1 -anchor nw -expand 0 -padx 0 -fill none -side top
+
+	checkbutton $site_8_7_1.enableFactoryLinkingCheckBoxSettings -command {CheckForSettingsApplyEnable} -offvalue "No" -onvalue "Yes"  -text "Enable Factory Linking" -variable PPref(EnableFactoryLinking)
+	vTcl:DefineAlias "$site_8_7_1.enableFactoryLinkingCheckBoxSettings" "CheckButtonEnableFactoryLinkingSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_1.enableFactoryLinkingCheckBoxSettings -in $site_8_7_1 -anchor nw -expand 0 -padx 0 -fill none -side top
+
+	pack $site_8_7_0.userDefaultsFrame -in $site_8_7_0 -anchor nw -expand 0 -fill x -side top
+ 	pack $site_8_7.freeFactoryOptionsFrame -in $site_8_7 -anchor center -expand 1 -fill x -side top
+
+	::iwidgets::labeledframe $site_8_7.freeFactoryEmailFrame -labelpos nw -labeltext "EMail Settings"
+	vTcl:DefineAlias "$site_8_7.freeFactoryEmailFrame" "LabeledFrameEmailSettings" vTcl:WidgetProc "Toplevel1" 1
+
+	set site_8_7_3 [$site_8_7.freeFactoryEmailFrame childsite]
+
+	::iwidgets::entryfield $site_8_7_3.sMTPEMailServerEntry -width 30 -labeltext "SMTP EMail Server" \
+	-textvariable PPref(SMTPEMailServer) -relief sunken -justify left -command {CheckForSettingsApplyEnable}
+	vTcl:DefineAlias "$site_8_7_3.sMTPEMailServerEntry" "SMTPEMailServerEntry" vTcl:WidgetProc "Toplevel1" 1
+	set BindWidget "$site_8_7_3.sMTPEMailServerEntry"
+	set BindWidgetEntry "$site_8_7_3.sMTPEMailServerEntry.lwchildsite.entry"
+	vTcl:DefineAlias "$BindWidgetEntry" "EntrySMTPEMailServerChild" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_3.sMTPEMailServerEntry -in $site_8_7_3 -anchor nw -expand 0 -fill none -side top
+	bind $BindWidgetEntry <FocusOut> {CheckForSettingsApplyEnable}
+	bind $BindWidgetEntry <FocusIn> {
+		if {$PPref(SelectAllText) == "Yes"} {EntrySMTPEMailServerChild select range 0 end}
+		EntrySMTPEMailServerChild icursor end
+	}
+	bind $BindWidgetEntry <Key-Return> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.portEMailServerEntry.lwchildsite.entry}
+	bind $BindWidgetEntry <Key-KP_Enter> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.portEMailServerEntry.lwchildsite.entry}
+	bind $BindWidgetEntry <Control-Down> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.portEMailServerEntry.lwchildsite.entry}
+	bind $BindWidgetEntry <Control-Up> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.eMailFromAddressEntry.lwchildsite.entry}
+	bind $BindWidgetEntry <Control-Left> {}
+	bind $BindWidgetEntry <Control-Right> {}
+
+	::iwidgets::entryfield $site_8_7_3.portEMailServerEntry -width 5 -labeltext "EMail Port" \
+	-textvariable PPref(SMTPEMailPort) -relief sunken -justify right -command {CheckForSettingsApplyEnable}
+	vTcl:DefineAlias "$site_8_7_3.portEMailServerEntry" "EMailPortEntry" vTcl:WidgetProc "Toplevel1" 1
+	set BindWidget "$site_8_7_3.portEMailServerEntry"
+	set BindWidgetEntry "$site_8_7_3.portEMailServerEntry.lwchildsite.entry"
+	vTcl:DefineAlias "$BindWidgetEntry" "EntryEMailPortChild" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_3.portEMailServerEntry -in $site_8_7_3 -anchor nw -expand 0 -fill none -side top
+	bind $BindWidgetEntry <FocusOut> {CheckForSettingsApplyEnable}
+	bind $BindWidgetEntry <FocusIn> {
+		if {$PPref(SelectAllText) == "Yes"} {EntryEMailPortChild select range 0 end}
+		EntryEMailPortChild icursor end
+	}
+	bind $BindWidgetEntry <Key-Return> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.eMailUserNameEntry.lwchildsite.entry}
+	bind $BindWidgetEntry <Key-KP_Enter> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.eMailUserNameEntry.lwchildsite.entry}
+	bind $BindWidgetEntry <Control-Down> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.eMailUserNameEntry.lwchildsite.entry}
+	bind $BindWidgetEntry <Control-Up> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.sMTPEMailServerEntry.lwchildsite.entry}
+
+	::iwidgets::entryfield $site_8_7_3.eMailUserNameEntry -width 30 -labeltext "User Name" \
+	-textvariable PPref(SMTPEMailUserName) -relief sunken -justify left -command {CheckForSettingsApplyEnable}
+	vTcl:DefineAlias "$site_8_7_3.eMailUserNameEntry" "EMailUserNameEntry" vTcl:WidgetProc "Toplevel1" 1
+	set BindWidget "$site_8_7_3.eMailUserNameEntry"
+	set BindWidgetEntry "$site_8_7_3.eMailUserNameEntry.lwchildsite.entry"
+	vTcl:DefineAlias "$BindWidgetEntry" "EntryEMailUserNameChild" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_3.eMailUserNameEntry -in $site_8_7_3 -anchor nw -expand 0 -fill none -side top
+	bind $BindWidgetEntry <FocusOut> {CheckForSettingsApplyEnable}
+	bind $BindWidgetEntry <FocusIn> {
+		if {$PPref(SelectAllText) == "Yes"} {EntryEMailUserNameChild select range 0 end}
+		EntryEMailUserNameChild icursor end
+	}
+	bind $BindWidgetEntry <Key-Return> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.eMailPasswordEntry.lwchildsite.entry}
+	bind $BindWidgetEntry <Key-KP_Enter> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.eMailPasswordEntry.lwchildsite.entry}
+	bind $BindWidgetEntry <Control-Down> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.eMailPasswordEntry.lwchildsite.entry}
+	bind $BindWidgetEntry <Control-Up> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.portEMailServerEntry.lwchildsite.entry}
+
+	::iwidgets::entryfield $site_8_7_3.eMailPasswordEntry -width 20 -labeltext "Password" \
+	-textvariable PPref(SMTPEMailPassword) -relief sunken -justify left -show "*" -command {CheckForSettingsApplyEnable}
+	vTcl:DefineAlias "$site_8_7_3.eMailPasswordEntry" "EMailPasswordEntry" vTcl:WidgetProc "Toplevel1" 1
+	set BindWidget "$site_8_7_3.eMailPasswordEntry"
+	set BindWidgetEntry "$site_8_7_3.eMailPasswordEntry.lwchildsite.entry"
+	vTcl:DefineAlias "$BindWidgetEntry" "EntryEMailPasswordChild" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_3.eMailPasswordEntry -in $site_8_7_3 -anchor nw -expand 0 -fill none -side top
+	bind $BindWidgetEntry <FocusOut> {CheckForSettingsApplyEnable}
+	bind $BindWidgetEntry <FocusIn> {
+		if {$PPref(SelectAllText) == "Yes"} {EntryEMailPasswordChild select range 0 end}
+		EntryEMailPasswordChild icursor end
+	}
+	bind $BindWidgetEntry <Key-Return> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.eMailFromNameEntry.lwchildsite.entry}
+	bind $BindWidgetEntry <Key-KP_Enter> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.eMailFromNameEntry.lwchildsite.entry}
+	bind $BindWidgetEntry <Control-Down> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.eMailFromNameEntry.lwchildsite.entry}
+	bind $BindWidgetEntry <Control-Up> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.eMailUserNameEntry.lwchildsite.entry}
+
+	::iwidgets::entryfield $site_8_7_3.eMailFromNameEntry -width 30 -labeltext "FromName" \
+	-textvariable PPref(SMTPEMailFromName) -relief sunken -justify left -command {CheckForSettingsApplyEnable}
+	vTcl:DefineAlias "$site_8_7_3.eMailFromNameEntry" "EMailFromNameEntry" vTcl:WidgetProc "Toplevel1" 1
+	set BindWidget "$site_8_7_3.eMailFromNameEntry"
+	set BindWidgetEntry "$site_8_7_3.eMailFromNameEntry.lwchildsite.entry"
+	vTcl:DefineAlias "$BindWidgetEntry" "EntryEMailFromNameChild" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_3.eMailFromNameEntry -in $site_8_7_3 -anchor nw -expand 0 -fill none -side top
+	bind $BindWidgetEntry <FocusOut> {CheckForSettingsApplyEnable}
+	bind $BindWidgetEntry <FocusIn> {
+		if {$PPref(SelectAllText) == "Yes"} {EntryEMailFromNameChild select range 0 end}
+		EntryEMailFromNameChild icursor end
+	}
+	bind $BindWidgetEntry <Key-Return> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.eMailFromAddressEntry.lwchildsite.entry}
+	bind $BindWidgetEntry <Key-KP_Enter> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.eMailFromAddressEntry.lwchildsite.entry}
+	bind $BindWidgetEntry <Control-Down> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.eMailFromAddressEntry.lwchildsite.entry}
+	bind $BindWidgetEntry <Control-Up> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.eMailPasswordEntry.lwchildsite.entry}
+
+	::iwidgets::entryfield $site_8_7_3.eMailFromAddressEntry -width 30 -labeltext "FromAddress" \
+	-textvariable PPref(SMTPEMailFromAddress) -relief sunken -justify left -command {CheckForSettingsApplyEnable}
+	vTcl:DefineAlias "$site_8_7_3.eMailFromAddressEntry" "EMailFromAddressEntry" vTcl:WidgetProc "Toplevel1" 1
+	set BindWidget "$site_8_7_3.eMailFromAddressEntry"
+	set BindWidgetEntry "$site_8_7_3.eMailFromAddressEntry.lwchildsite.entry"
+	vTcl:DefineAlias "$BindWidgetEntry" "EntryEMailFromAddressChild" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_3.eMailFromAddressEntry -in $site_8_7_3 -anchor nw -expand 0 -fill none -side top
+	bind $BindWidgetEntry <FocusOut> {CheckForSettingsApplyEnable}
+	bind $BindWidgetEntry <FocusIn> {
+		if {$PPref(SelectAllText) == "Yes"} {EntryEMailFromAddressChild select range 0 end}
+		EntryEMailFromAddressChild icursor end
+	}
+	bind $BindWidgetEntry <Key-Return> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.sMTPEMailServerEntry.lwchildsite.entry}
+	bind $BindWidgetEntry <Key-KP_Enter> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.sMTPEMailServerEntry.lwchildsite.entry}
+	bind $BindWidgetEntry <Control-Down> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.sMTPEMailServerEntry.lwchildsite.entry}
+	bind $BindWidgetEntry <Control-Up> {focus .settings.settingsTabNotebook.canvas.notebook.cs.page4.cs.freeFactoryEmailFrame.childsite.eMailFromNameEntry.lwchildsite.entry}
+
+	frame $site_8_7_3.tlsFrame -height 31 -relief flat -height 50 -borderwidth 0 -highlightthickness 0 -highlightcolor #e6e6e6
+	vTcl:DefineAlias "$site_8_7_3.tlsFrame" "FrameEMailTLS" vTcl:WidgetProc "Toplevel1" 1
+
+	set site_8_7_4 $site_8_7_3.tlsFrame
+
+	label $site_8_7_4.eMailTLSSettingsLabelSettings -text "TLS" -background #ececec
+	vTcl:DefineAlias "$site_8_7_4.eMailTLSSettingsLabelSettings" "LabelEMailTLSSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_4.eMailTLSSettingsLabelSettings -in $site_8_7_4 -anchor e -expand 0 -padx 2 -fill none -side left
+
+	radiobutton $site_8_7_4.eMailTLSSettingsYesRadioButtonSettings \
+	-command {CheckForSettingsApplyEnable} -text "Yes" -value 1 -variable PPref(SMTPEMailTLS)
+	vTcl:DefineAlias "$site_8_7_4.eMailTLSSettingsYesRadioButtonSettings" "RadioButtonEMailTLSYesSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_4.eMailTLSSettingsYesRadioButtonSettings -in $site_8_7_4 -anchor e -expand 0 -fill none -side left
+
+	radiobutton $site_8_7_4.eMailTLSSettingsNoRadioButtonSettings \
+	-command {CheckForSettingsApplyEnable} -text "No" -value 0 -variable PPref(SMTPEMailTLS)
+	vTcl:DefineAlias "$site_8_7_4.eMailTLSSettingsNoRadioButtonSettings" "RadioButtonEMailTLSNoSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_4.eMailTLSSettingsNoRadioButtonSettings -in $site_8_7_4 -anchor e -expand 0 -fill none -side left
+
+	button $site_8_7_4.addGlobalEMailMessageButton -borderwidth 1 -highlightthickness 0 -relief raised \
+	-command {
+		source "/opt/FreeFactory/bin/FreeFactoryEMailMessage.tcl"
+		Window show .freeFactoryEMailMessage
+		Window show .freeFactoryEMailMessage
+		widgetUpdate
+		ScrolledTextFactoryEMailMessage clear
+		ScrolledTextFactoryEMailMessage insert end $PPref(GlobalEMailMessage)
+
+	} -image [vTcl:image:get_image [file join / opt FreeGlobal Pics message32x32.gif]]
+	vTcl:DefineAlias "$site_8_7_4.addGlobalEMailMessageButton" "ButtonAddGlobalEMailMessage" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_7_4.addGlobalEMailMessageButton -in $site_8_7_4 -anchor center -expand 1 -fill none -side right
+	balloon $site_8_7_4.addGlobalEMailMessageButton "Add Message"
+
+	pack $site_8_7_3.tlsFrame -in $site_8_7_3 -anchor nw -expand 0 -fill x -side top
+ 	pack $site_8_7.freeFactoryEmailFrame -in $site_8_7 -anchor center -expand 1 -fill x -side top
+
+#############################################################################
+	set site_8_8 [lindex [$top.settingsTabNotebook childsite] 4]
+
+	::iwidgets::labeledframe $site_8_8.filePathFrame -labelpos nw -labeltext "File Paths"
+	vTcl:DefineAlias "$site_8_8.filePathFrame" "LabeledFrameFilePathSettings" vTcl:WidgetProc "Toplevel1" 1
+
+	set site_8_8_0 [$site_8_8.filePathFrame childsite]
+
+	frame $site_8_8_0.framePDFReaderPath -height 2 -highlightcolor black -relief flat -width 12  -border 0
+	vTcl:DefineAlias "$site_8_8_0.framePDFReaderPath" "FramePDFReaderPath" vTcl:WidgetProc "Toplevel1" 1
+
+	set site_8_8_0_1 $site_8_8_0.framePDFReaderPath
+
+	::iwidgets::entryfield $site_8_8_0_1.pdfReaderPathEntry -borderwidth 2  -relief sunken -labelpos w \
 	-labeltext "PDF Reader Path" -textvariable PDFReaderPath -width 35
-	set BindWidget "$site_8_7_0_1.pdfReaderPathEntry"
-	set BindWidgetEntry "$site_8_7_0_1.pdfReaderPathEntry.lwchildsite.entry"
+	set BindWidget "$site_8_8_0_1.pdfReaderPathEntry"
+	set BindWidgetEntry "$site_8_8_0_1.pdfReaderPathEntry.lwchildsite.entry"
 	vTcl:DefineAlias "$BindWidget" "PDFReaderPathSettingsEntry" vTcl:WidgetProc "Toplevel1" 1
 	vTcl:DefineAlias "$BindWidgetEntry" "EntryPDFReaderPathSettingsChild" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_8_7_0_1.pdfReaderPathEntry -in $site_8_7_0_1 -anchor nw -expand 1 -fill x -side left
+	pack $site_8_8_0_1.pdfReaderPathEntry -in $site_8_8_0_1 -anchor nw -expand 1 -fill x -side left
 	bind $BindWidgetEntry <FocusIn> {
 		if {$PPref(SelectAllText) == "Yes"} {EntryPDFReaderPathSettingsChild select range 0 end}
 		PDFReaderPathSettingsEntry icursor end
 	}
 
-	button $site_8_7_0_1.browsePDFReaderPathButton -relief raise -borderwidth 1 \
+	button $site_8_8_0_1.browsePDFReaderPathButton -relief raise -borderwidth 1 \
 	-command {
 		source "/usr/local/FreeFactory/FileDialog.tcl"
 		set WindowName "Browse PDF Reader Path"
@@ -1207,67 +1474,66 @@ proc vTclWindow.settings {base} {
 			CheckForSettingsApplyEnable
 		}
 	} -image [vTcl:image:get_image [file join / usr local  FreeFactory Pics open.gif]]
-	vTcl:DefineAlias "$site_8_7_0_1.browsePDFReaderPathButton" "ButtonPDFReaderPathSettings" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_8_7_0_1.browsePDFReaderPathButton -in $site_8_7_0_1 -anchor nw -expand 0 -fill none -side right
-	balloon $site_8_7_0_1.browsePDFReaderPathButton "Browse"
+	vTcl:DefineAlias "$site_8_8_0_1.browsePDFReaderPathButton" "ButtonPDFReaderPathSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_8_0_1.browsePDFReaderPathButton -in $site_8_8_0_1 -anchor nw -expand 0 -fill none -side right
+	balloon $site_8_8_0_1.browsePDFReaderPathButton "Browse"
 
-	pack $site_8_7_0.framePDFReaderPath -in $site_8_7_0 -anchor center -expand 1 -fill x -side top
-	pack $site_8_7.filePathFrame -in $site_8_7 -anchor center -expand 1 -fill x -side top
+	pack $site_8_8_0.framePDFReaderPath -in $site_8_8_0 -anchor center -expand 1 -fill x -side top
+	pack $site_8_8.filePathFrame -in $site_8_8 -anchor center -expand 1 -fill x -side top
 
-	::iwidgets::labeledframe $site_8_7.selectionOptionsFrame -labelpos nw -labeltext "Text Selection Options"
-	vTcl:DefineAlias "$site_8_7.selectionOptionsFrame" "LabeledFrameSelectionOptionsSettings" vTcl:WidgetProc "Toplevel1" 1
+	::iwidgets::labeledframe $site_8_8.selectionOptionsFrame -labelpos nw -labeltext "Text Selection Options"
+	vTcl:DefineAlias "$site_8_8.selectionOptionsFrame" "LabeledFrameSelectionOptionsSettings" vTcl:WidgetProc "Toplevel1" 1
 
-	set site_8_7_0 [$site_8_7.selectionOptionsFrame childsite]
+	set site_8_8_0 [$site_8_8.selectionOptionsFrame childsite]
 
-	checkbutton $site_8_7_0.textSelectCheckButton \
+	checkbutton $site_8_8_0.textSelectCheckButton \
 	 -command {
 		set PPrefTmp(SelectAllText) $SelectAllText
 		CheckForSettingsApplyEnable
 	} -text "Select all text on widget entry" -onvalue "Yes" -offvalue "No" -variable SelectAllText -wrap 0
-	vTcl:DefineAlias "$site_8_7_0.textSelectCheckButton" "CheckButtonSelectAllTextSettings" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_8_7_0.textSelectCheckButton -in $site_8_7_0 -anchor nw -expand 0 -fill none -side top
+	vTcl:DefineAlias "$site_8_8_0.textSelectCheckButton" "CheckButtonSelectAllTextSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_8_0.textSelectCheckButton -in $site_8_8_0 -anchor nw -expand 0 -fill none -side top
 
-	pack $site_8_7.selectionOptionsFrame -in $site_8_7 -anchor center -expand 1 -fill x -side top
+	pack $site_8_8.selectionOptionsFrame -in $site_8_8 -anchor center -expand 1 -fill x -side top
 
-	::iwidgets::labeledframe $site_8_7.selectionConfirmationsFrame -labelpos nw -labeltext "Confirmation Options"
-	vTcl:DefineAlias "$site_8_7.selectionConfirmationsFrame" "LabeledFrameSelectionConfirmationsSettings" vTcl:WidgetProc "Toplevel1" 1
+	::iwidgets::labeledframe $site_8_8.selectionConfirmationsFrame -labelpos nw -labeltext "Confirmation Options"
+	vTcl:DefineAlias "$site_8_8.selectionConfirmationsFrame" "LabeledFrameSelectionConfirmationsSettings" vTcl:WidgetProc "Toplevel1" 1
 
-	set site_8_7_1 [$site_8_7.selectionConfirmationsFrame childsite]
+	set site_8_8_1 [$site_8_8.selectionConfirmationsFrame childsite]
 
-	checkbutton $site_8_7_1.confirmFileSavesCheckButton \
+	checkbutton $site_8_8_1.confirmFileSavesCheckButton \
 	-command {
 		set PPrefTmp(ConfirmFileSaves) $ConfirmFileSaves
 		CheckForSettingsApplyEnable
 	} -text "Confirm File Saves" -onvalue "Yes" -offvalue "No" -variable ConfirmFileSaves -wrap 0
-	vTcl:DefineAlias "$site_8_7_1.confirmFileSavesCheckButton" "CheckButtonConfirmFileSavesSettings" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_8_7_1.confirmFileSavesCheckButton -in $site_8_7_1 -anchor nw -expand 0 -fill none -side top
+	vTcl:DefineAlias "$site_8_8_1.confirmFileSavesCheckButton" "CheckButtonConfirmFileSavesSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_8_1.confirmFileSavesCheckButton -in $site_8_8_1 -anchor nw -expand 0 -fill none -side top
 
-	checkbutton $site_8_7_1.confirmFileDeletionsCheckButton \
+	checkbutton $site_8_8_1.confirmFileDeletionsCheckButton \
 	 -command {
 		set PPrefTmp(ConfirmFileDeletions) $ConfirmFileDeletions
 		CheckForSettingsApplyEnable
 	} -text "Confirm File Deletions" -onvalue "Yes" -offvalue "No" -variable ConfirmFileDeletions -wrap 0
-	vTcl:DefineAlias "$site_8_7_1.confirmFileDeletionsCheckButton" "CheckButtonConfirmFileDeletionSettings" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_8_7_1.confirmFileDeletionsCheckButton -in $site_8_7_1 -anchor nw -expand 0 -fill none -side top
+	vTcl:DefineAlias "$site_8_8_1.confirmFileDeletionsCheckButton" "CheckButtonConfirmFileDeletionSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_8_1.confirmFileDeletionsCheckButton -in $site_8_8_1 -anchor nw -expand 0 -fill none -side top
 
 
-	pack $site_8_7.selectionConfirmationsFrame -in $site_8_7 -anchor center -expand 1 -fill x -side top
+	pack $site_8_8.selectionConfirmationsFrame -in $site_8_8 -anchor center -expand 1 -fill x -side top
 
-	::iwidgets::labeledframe $site_8_7.selectionIconBarFrame -labelpos nw -labeltext "Icon Button Bar & Tool Tip Options"
-	vTcl:DefineAlias "$site_8_7.selectionIconBarFrame" "LabeledFrameSelectionIconBarSettings" vTcl:WidgetProc "Toplevel1" 1
+	::iwidgets::labeledframe $site_8_8.selectionIconBarFrame -labelpos nw -labeltext "Icon Button Bar & Tool Tip Options"
+	vTcl:DefineAlias "$site_8_8.selectionIconBarFrame" "LabeledFrameSelectionIconBarSettings" vTcl:WidgetProc "Toplevel1" 1
 
-	set site_8_7_2 [$site_8_7.selectionIconBarFrame childsite]
+	set site_8_8_2 [$site_8_8.selectionIconBarFrame childsite]
 
-	checkbutton $site_8_7_2.showToolTipsCheckButton -activebackground #f9f9f9 -activeforeground black \
+	checkbutton $site_8_8_2.showToolTipsCheckButton -activebackground #f9f9f9 -activeforeground black \
 	 -command {
 		set PPrefTmp(ShowToolTips) $ShowToolTips
 		CheckForSettingsApplyEnable
 	} -text "Show Tool Tips" -onvalue "Yes" -offvalue "No" -variable ShowToolTips -wrap 0
-	vTcl:DefineAlias "$site_8_7_2.showToolTipsCheckButton" "CheckButtonShowToolTipsSettings" vTcl:WidgetProc "Toplevel1" 1
-	pack $site_8_7_2.showToolTipsCheckButton -in $site_8_7_2 -anchor nw -expand 0 -fill none -side top
+	vTcl:DefineAlias "$site_8_8_2.showToolTipsCheckButton" "CheckButtonShowToolTipsSettings" vTcl:WidgetProc "Toplevel1" 1
+	pack $site_8_8_2.showToolTipsCheckButton -in $site_8_8_2 -anchor nw -expand 0 -fill none -side top
 
-	pack $site_8_7.selectionIconBarFrame -in $site_8_7 -anchor center -expand 1 -fill x -side top
-
+	pack $site_8_8.selectionIconBarFrame -in $site_8_8 -anchor center -expand 1 -fill x -side top
 #############################################################################
 #############################################################################
     $top.settingsTabNotebook select 0
@@ -1318,8 +1584,26 @@ proc vTclWindow.settings {base} {
 		set PPref(ConfirmFileDeletions) $PPrefTmp(ConfirmFileDeletions)
 		set PPref(PDFReaderPath) $PPrefTmp(PDFReaderPath)
 		set PPref(ShowToolTips) $PPrefTmp(ShowToolTips)
-		set PPref(TheCompanyName) $TheCompanyName
-		set PPref(AppleDelay) $AppleDelay
+		set PPref(TheCompanyName) $PPrefTmp(TheCompanyName)
+		set PPref(AppleDelay) $PPrefTmp(AppleDelay)
+		set PPref(FFMxProgram) $PPrefTmp(FFMxProgram)
+		set PPref(RunFrom) $PPrefTmp(RunFrom)
+		set PPref(EnableEMail) $PPrefTmp(EnableEMail)
+		set PPref(EnableFactoryLinking) $PPrefTmp(EnableFactoryLinking)
+		set PPref(FTPTransferType) $PPrefTmp(FTPTransferType)
+		set PPref(FTPDeleteAfter) $PPrefTmp(FTPDeleteAfter)
+		set PPref(EnableFactory) $PPrefTmp(EnableFactory)
+		set PPref(DeleteSource) $PPrefTmp(DeleteSource)
+		set PPref(DeleteLogs) $PPrefTmp(DeleteLogs)
+		set PPref(FreeFactoryAction) $PPrefTmp(FreeFactoryAction)
+		set PPref(SMTPEMailServer) $PPrefTmp(SMTPEMailServer)
+		set PPref(SMTPEMailPort) $PPrefTmp(SMTPEMailPort)
+		set PPref(SMTPEMailUserName) $PPrefTmp(SMTPEMailUserName)
+		set PPref(SMTPEMailPassword) $PPrefTmp(SMTPEMailPassword)
+		set PPref(SMTPEMailFromName) $PPrefTmp(SMTPEMailFromName)
+		set PPref(SMTPEMailFromAddress) $PPrefTmp(SMTPEMailFromAddress)
+		set PPref(SMTPEMailTLS) $PPrefTmp(SMTPEMailTLS)
+		set PPref(GlobalEMailMessage) $PPrefTmp(GlobalEMailMessage)
 		widgetUpdate
 
 # If CreateUpdateFile is checked then set the file
@@ -1343,8 +1627,26 @@ proc vTclWindow.settings {base} {
 		set PPrefTmp(ConfirmFileDeletions) $ConfirmFileDeletions
 		set PPrefTmp(PDFReaderPath) $PDFReaderPath
 		set PPrefTmp(ShowToolTips) $ShowToolTips
-		set PPrefTmp(TheCompanyName) $TheCompanyName
-		set PPrefTmp(AppleDelay) $AppleDelay
+		set PPrefTmp(TheCompanyName) $PPref(TheCompanyName)
+		set PPrefTmp(AppleDelay) $PPref(AppleDelay)
+		set PPrefTmp(FFMxProgram) $PPref(FFMxProgram)
+		set PPrefTmp(RunFrom) $PPref(RunFrom)
+		set PPrefTmp(EnableEMail) $PPref(EnableEMail)
+		set PPrefTmp(EnableFactoryLinking) $PPref(EnableFactoryLinking)
+		set PPrefTmp(FTPTransferType) $PPref(FTPTransferType)
+		set PPrefTmp(FTPDeleteAfter) $PPref(FTPDeleteAfter)
+		set PPrefTmp(EnableFactory) $PPref(EnableFactory)
+		set PPrefTmp(DeleteSource) $PPref(DeleteSource)
+		set PPrefTmp(DeleteLogs) $PPref(DeleteLogs)
+		set PPrefTmp(FreeFactoryAction) $PPref(FreeFactoryAction)
+		set PPrefTmp(SMTPEMailServer) $PPref(SMTPEMailServer)
+		set PPrefTmp(SMTPEMailPort) $PPref(SMTPEMailPort)
+		set PPrefTmp(SMTPEMailUserName) $PPref(SMTPEMailUserName)
+		set PPrefTmp(SMTPEMailPassword) $PPref(SMTPEMailPassword)
+		set PPrefTmp(SMTPEMailFromName) $PPref(SMTPEMailFromName)
+		set PPrefTmp(SMTPEMailFromAddress) $PPref(SMTPEMailFromAddress)
+		set PPrefTmp(SMTPEMailTLS) $PPref(SMTPEMailTLS)
+		set PPrefTmp(GlobalEMailMessage) $PPref(GlobalEMailMessage)
 		set PPref(color,window,fore) $PPrefTmp(color,window,fore)
 		set PPref(color,window,back) $PPrefTmp(color,window,back)
 		set PPref(color,widget,fore) $PPrefTmp(color,widget,fore)
@@ -1401,8 +1703,24 @@ proc vTclWindow.settings {base} {
 		set PPrefRestore(ConfirmFileDeletions) $PPrefTmp(ConfirmFileDeletions)
 		set PPrefRestore(PDFReaderPath) $PPrefTmp(PDFReaderPath)
 		set PPrefRestore(ShowToolTips) $PPrefTmp(ShowToolTips)
-		set PPrefRestore(TheCompanyName) $TheCompanyName
-		set PPrefRestore(AppleDelay) $AppleDelay
+		set PPrefRestore(TheCompanyName) $PPrefTmp(TheCompanyName)
+		set PPrefRestore(AppleDelay) $PPrefTmp(AppleDelay)
+		set PPrefRestore(FFMxProgram) $PPrefTmp(FFMxProgram)
+		set PPrefRestore(RunFrom) $PPrefTmp(RunFrom)
+		set PPrefRestore(FTPTransferType) $PPrefTmp(FTPTransferType)
+		set PPrefRestore(FTPDeleteAfter) $PPrefTmp(FTPDeleteAfter)
+		set PPrefRestore(EnableFactory) $PPrefTmp(EnableFactory)
+		set PPrefRestore(DeleteSource) $PPrefTmp(DeleteSource)
+		set PPrefRestore(DeleteLogs) $PPrefTmp(DeleteLogs)
+		set PPrefRestore(FreeFactoryAction) $PPrefTmp(FreeFactoryAction)
+		set PPrefRestore(SMTPEMailServer) $PPrefTmp(SMTPEMailServer)
+		set PPrefRestore(SMTPEMailPort) $PPrefTmp(SMTPEMailPort)
+		set PPrefRestore(SMTPEMailUserName) $PPrefTmp(SMTPEMailUserName)
+		set PPrefRestore(SMTPEMailPassword) $PPrefTmp(SMTPEMailPassword)
+		set PPrefRestore(SMTPEMailFromName) $PPrefTmp(SMTPEMailFromName)
+		set PPrefRestore(SMTPEMailFromAddress) $PPrefTmp(SMTPEMailFromAddress)
+		set PPrefRestore(SMTPEMailTLS) $PPrefTmp(SMTPEMailTLS)
+		set PPrefRestore(GlobalEMailMessage) $PPrefTmp(GlobalEMailMessage)
 		widgetUpdate
 		CheckForSettingsApplyEnable
 
@@ -1446,6 +1764,22 @@ proc vTclWindow.settings {base} {
 		set PPrefTmp(ShowToolTips) $PPrefRestore(ShowToolTips)
 		set PPrefRestore(TheCompanyName) $PPrefTmp(TheCompanyName)
 		set PPrefRestore(AppleDelay) $PPrefTmp(AppleDelay)
+		set PPrefRestore(FFMxProgram) $PPrefTmp(FFMxProgram)
+		set PPrefRestore(RunFrom) $PPrefTmp(RunFrom)
+		set PPrefRestore(FTPTransferType) $PPrefTmp(FTPTransferType)
+		set PPrefRestore(FTPDeleteAfter) $PPrefTmp(FTPDeleteAfter)
+		set PPrefRestore(EnableFactory) $PPrefTmp(EnableFactory)
+		set PPrefRestore(DeleteSource) $PPrefTmp(DeleteSource)
+		set PPrefRestore(DeleteLogs) $PPrefTmp(DeleteLogs)
+		set PPrefRestore(FreeFactoryAction) $PPrefTmp(FreeFactoryAction)
+		set PPrefRestore(SMTPEMailServer) $PPrefTmp(SMTPEMailServer)
+		set PPrefRestore(SMTPEMailPort) $PPrefTmp(SMTPEMailPort)
+		set PPrefRestore(SMTPEMailUserName) $PPrefTmp(SMTPEMailUserName)
+		set PPrefRestore(SMTPEMailPassword) $PPrefTmp(SMTPEMailPassword)
+		set PPrefRestore(SMTPEMailFromName) $PPrefTmp(SMTPEMailFromName)
+		set PPrefRestore(SMTPEMailFromAddress) $PPrefTmp(SMTPEMailFromAddress)
+		set PPrefRestore(SMTPEMailTLS) $PPrefTmp(SMTPEMailTLS)
+		set PPrefRestore(GlobalEMailMessage) $PPrefTmp(GlobalEMailMessage)
 		if {$currentColorWidget == "Window Foreground"} {set tmpcolor $PPrefTmp(color,window,fore)}
 		if {$currentColorWidget == "Window Background"} {set tmpcolor $PPrefTmp(color,window,back)}
 		if {$currentColorWidget == "Active Foreground"} {set tmpcolor $PPrefTmp(color,active,fore)}
@@ -1566,6 +1900,22 @@ proc vTclWindow.settings {base} {
 		set ShowToolTips $PPrefRestore(ShowToolTips)
 		set PPrefTmp(TheCompanyName) $PPrefRestore(TheCompanyName)
 		set PPrefTmp(AppleDelay) $PPrefRestore(AppleDelay)
+		set PPrefTmp(FFMxProgram) $PPrefRestore(FFMxProgram)
+		set PPrefTmp(RunFrom) $PPrefRestore(RunFrom)
+		set PPrefTmp(FTPTransferType) $PPrefRestore(FTPTransferType)
+		set PPrefTmp(FTPDeleteAfter) $PPrefRestore(FTPDeleteAfter)
+		set PPrefTmp(EnableFactory) $PPrefRestore(EnableFactory)
+		set PPrefTmp(DeleteSource) $PPrefRestore(DeleteSource)
+		set PPrefTmp(DeleteLogs) $PPrefRestore(DeleteLogs)
+		set PPrefTmp(FreeFactoryAction) $PPrefRestore(FreeFactoryAction)
+		set PPrefTmp(SMTPEMailServer) $PPrefRestore(SMTPEMailServer)
+		set PPrefTmp(SMTPEMailPort) $PPrefRestore(SMTPEMailPort)
+		set PPrefTmp(SMTPEMailUserName) $PPrefRestore(SMTPEMailUserName)
+		set PPrefTmp(SMTPEMailPassword) $PPrefRestore(SMTPEMailPassword)
+		set PPrefTmp(SMTPEMailFromName) $PPrefRestore(SMTPEMailFromName)
+		set PPrefTmp(SMTPEMailFromAddress) $PPrefRestore(SMTPEMailFromAddress)
+		set PPrefTmp(SMTPEMailTLS) $PPrefRestore(SMTPEMailTLS)
+		set PPrefTmp(GlobalEMailMessage) $PPrefRestore(GlobalEMailMessage)
 		widgetUpdate
 # Run sub routine to display the icon button frames if selected
 		destroy window .settings
@@ -1828,7 +2178,6 @@ proc ::initSettings {} {
 
 ## End Settings Font
 #############################################################################
-
 # Start Initialize Free Factory variables
 	set SelectedDirectoryPath ""
 	set NotifyRuntimeUser ""
@@ -1909,6 +2258,24 @@ proc ::initEditSettings {} {
 	set PPrefTmp(ShowToolTips) $PPref(ShowToolTips)
 	set PPrefTmp(TheCompanyName) $PPref(TheCompanyName)
 	set PPrefTmp(AppleDelay) $PPref(AppleDelay)
+	set PPrefTmp(FFMxProgram) $PPref(FFMxProgram)
+	set PPrefTmp(RunFrom) $PPref(RunFrom)
+	set PPrefTmp(EnableEMail) $PPref(EnableEMail)
+	set PPrefTmp(EnableFactoryLinking) $PPref(EnableFactoryLinking)
+	set PPrefTmp(FTPTransferType) $PPref(FTPTransferType)
+	set PPrefTmp(FTPDeleteAfter) $PPref(FTPDeleteAfter)
+	set PPrefTmp(EnableFactory) $PPref(EnableFactory)
+	set PPrefTmp(DeleteSource) $PPref(DeleteSource)
+	set PPrefTmp(DeleteLogs) $PPref(DeleteLogs)
+	set PPrefTmp(FreeFactoryAction) $PPref(FreeFactoryAction)
+	set PPrefTmp(SMTPEMailServer) $PPref(SMTPEMailServer)
+	set PPrefTmp(SMTPEMailPort) $PPref(SMTPEMailPort)
+	set PPrefTmp(SMTPEMailUserName) $PPref(SMTPEMailUserName)
+	set PPrefTmp(SMTPEMailPassword) $PPref(SMTPEMailPassword)
+	set PPrefTmp(SMTPEMailFromName) $PPref(SMTPEMailFromName)
+	set PPrefTmp(SMTPEMailFromAddress) $PPref(SMTPEMailFromAddress)
+	set PPrefTmp(SMTPEMailTLS) $PPref(SMTPEMailTLS)
+	set PPrefTmp(GlobalEMailMessage) $PPref(GlobalEMailMessage)
 	set PPrefRestore(color,window,fore) $PPref(color,window,fore)
 	set PPrefRestore(color,window,back) $PPref(color,window,back)
 	set PPrefRestore(color,active,fore) $PPref(color,active,fore)
@@ -1940,6 +2307,24 @@ proc ::initEditSettings {} {
 	set PPrefRestore(ShowToolTips) $PPref(ShowToolTips)
 	set PPrefRestore(TheCompanyName) $PPref(TheCompanyName)
 	set PPrefRestore(AppleDelay) $PPref(AppleDelay)
+	set PPrefRestore(FFMxProgram) $PPref(FFMxProgram)
+	set PPrefRestore(RunFrom) $PPref(RunFrom)
+	set PPrefRestore(EnableEMail) $PPref(EnableEMail)
+	set PPrefRestore(EnableFactoryLinking) $PPref(EnableFactoryLinking)
+	set PPrefRestore(FTPTransferType) $PPref(FTPTransferType)
+	set PPrefRestore(FTPDeleteAfter) $PPref(FTPDeleteAfter)
+	set PPrefRestore(EnableFactory) $PPref(EnableFactory)
+	set PPrefRestore(DeleteSource) $PPref(DeleteSource)
+	set PPrefRestore(DeleteLogs) $PPref(DeleteLogs)
+	set PPrefRestore(FreeFactoryAction) $PPref(FreeFactoryAction)
+	set PPrefRestore(SMTPEMailServer) $PPref(SMTPEMailServer)
+	set PPrefRestore(SMTPEMailPort) $PPref(SMTPEMailPort)
+	set PPrefRestore(SMTPEMailUserName) $PPref(SMTPEMailUserName)
+	set PPrefRestore(SMTPEMailPassword) $PPref(SMTPEMailPassword)
+	set PPrefRestore(SMTPEMailFromName) $PPref(SMTPEMailFromName)
+	set PPrefRestore(SMTPEMailFromAddress) $PPref(SMTPEMailFromAddress)
+	set PPrefRestore(SMTPEMailTLS) $PPref(SMTPEMailTLS)
+	set PPrefRestore(GlobalEMailMessage) $PPref(GlobalEMailMessage)
 	set DateFormatVar $PPref(DisplayDateFormat)
 	set ShortLongSeparater $PPref(DateSeparater)
 	set TimeFormatVar $PPref(DisplayTimeFormat)
@@ -1962,7 +2347,7 @@ proc ::initEditSettings {} {
 	
 	DisplayParametersComboBoxSettings insert entry 0 "Window Foreground"
 	set currentColorWidget "Window Foreground"
-	DisplayParametersComboBoxSettings configure  -editable 0
+	DisplayParametersComboBoxSettings configure -editable 0
 	EntrySampleLabelSettings delete 0 end
 	EntrySampleLabelSettings insert 0 "This is an example of inside widget."
 	
@@ -2061,7 +2446,15 @@ proc ::CheckForSettingsApplyEnable {} {
 	|| $PPrefTmp(SelectAllText) != $PPref(SelectAllText) || $PPrefTmp(ConfirmFileSaves) != $PPref(ConfirmFileSaves) || $PPrefTmp(ConfirmFileDeletions) != $PPref(ConfirmFileDeletions) \
 	|| $PPrefTmp(ShowToolTips) != $PPref(ShowToolTips)  || $PPref(DisplayDateFormat) != $PPrefTmp(DisplayDateFormat) || $PPref(DateSeparater) != $PPrefTmp(DateSeparater) \
 	|| $PPref(DisplayTimeFormat) != $PPrefTmp(DisplayTimeFormat) || $PPref(TimeSeparater) != $PPrefTmp(TimeSeparater) \
-	|| $PPref(TheCompanyName) != $PPrefTmp(TheCompanyName) || $PPref(AppleDelay) != $PPrefTmp(AppleDelay) \
+	|| $PPref(TheCompanyName) != $PPrefTmp(TheCompanyName) || $PPref(AppleDelay) != $PPrefTmp(AppleDelay) || $PPref(FFMxProgram) != $PPrefTmp(FFMxProgram) \
+	|| $PPref(RunFrom) != $PPrefTmp(RunFrom) || $PPref(EnableEMail) != $PPrefTmp(EnableEMail) || $PPref(EnableFactoryLinking) != $PPrefTmp(EnableFactoryLinking)  \
+	|| $PPref(FTPTransferType) != $PPrefTmp(FTPTransferType) || $PPref(FTPDeleteAfter) != $PPrefTmp(FTPDeleteAfter) \
+	|| $PPref(EnableFactory) != $PPrefTmp(EnableFactory) || $PPref(DeleteSource) != $PPrefTmp(DeleteSource) || $PPref(DeleteLogs) != $PPrefTmp(DeleteLogs) \
+	|| $PPref(FreeFactoryAction) != $PPrefTmp(FreeFactoryAction) || $PPref(SMTPEMailServer) != $PPrefTmp(SMTPEMailServer) \
+	|| $PPref(SMTPEMailPort) != $PPrefTmp(SMTPEMailPort) || $PPref(SMTPEMailUserName) != $PPrefTmp(SMTPEMailUserName) \
+	|| $PPref(SMTPEMailPassword) != $PPrefTmp(SMTPEMailPassword) || $PPref(SMTPEMailFromName) != $PPrefTmp(SMTPEMailFromName) \
+	|| $PPref(SMTPEMailFromAddress) != $PPrefTmp(SMTPEMailFromAddress) || $PPref(SMTPEMailTLS) != $PPrefTmp(SMTPEMailTLS) \
+	|| $PPref(GlobalEMailMessage) != $PPrefTmp(GlobalEMailMessage) \
 	|| $PPref(DisplayDayOfWeek) != $PPrefTmp(DisplayDayOfWeek) || $PPref(PDFReaderPath) != $PPrefTmp(PDFReaderPath)} {
 		.settings.footerFrame.settingsApplyButton configure -state normal
 	} else {

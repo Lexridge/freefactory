@@ -725,12 +725,12 @@ proc vTclWindow.fileDialog {base} {
 # prevents duplicates
 		set duplicateTrigger 0
 		foreach tmpvar $upLevelComboBoxListVar {
-                        	if {$fullDirPath == $tmpvar} {
+                       	if {$fullDirPath == $tmpvar} {
 				set duplicateTrigger 1
 				break
 			}
 		}
-			if {$duplicateTrigger == 0} {
+		if {$duplicateTrigger == 0} {
 # If not a duplicate then add the path to the combobox and sort it.
 # Then clear the combobox and refresh it.
 			set upLevelComboBoxListVar [lsort [lappend upLevelComboBoxListVar $fullDirPath]]

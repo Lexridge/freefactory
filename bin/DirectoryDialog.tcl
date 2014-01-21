@@ -41,7 +41,7 @@
 ################################################################################################
 proc vTclWindow.directoryDialog {base} {
 
-	global newDirNameName backLevelName
+	global newDirNameName backLevelName upLevelComboBoxListVar
 	global returnFilePath returnFileName returnFullPath directoryDialogOk fullDirPath dirpath toolTip windowName buttonImagePathDirectoryDialog
 	global screenx screeny PPref
 	global RenameDisplay fileRename PasteOverwriteFileName fileOverwriteConfirm
@@ -357,10 +357,8 @@ proc vTclWindow.directoryDialog {base} {
 
 # End Arrange submenu
 #########################################
-
 	vTcl:DefineAlias "$site_3_0.viewTypeButton.m.men59" "MenuButtonMenu2ViewDirectoryDialog" vTcl:WidgetProc "Toplevel1" 1
 	pack $site_3_0.viewTypeButton -in $site_3_0 -anchor nw -expand 1 -fill none -side left
-
 
 # End View Type Menu Button
 #########################################################################    
@@ -514,42 +512,7 @@ proc vTclWindow.directoryDialog {base} {
     $site_3_0.toolButton.m add command -command {
 		set backLevelName $fullDirPath
 		set fullDirPath "/mnt"
-# cd to the directory
-		set r [cd $fullDirPath]
-# Unable to get the unique property working.  This code
-# prevents duplicates
-		set duplicateTrigger 0
-		foreach tmpvar $upLevelComboBoxListVar {
-                    	if {$fullDirPath == $tmpvar} {
-				set duplicateTrigger 1
-				break
-			}
-		}
-		if {$duplicateTrigger == 0} {
-# If not a duplicate then add the path to the combobox and sort it.
-# Then clear the combobox and refresh it.
-			set upLevelComboBoxListVar [lsort [lappend upLevelComboBoxListVar $fullDirPath]]
-			ComboBoxUpLevelDirectoryDialog clear
-			foreach tmpvar $upLevelComboBoxListVar {
-				ComboBoxUpLevelDirectoryDialog insert list end $tmpvar
-               		}
-		}
-# Replace the current with the new selected path
-		ComboBoxUpLevelDirectoryDialog delete entry 0 end
-		ComboBoxUpLevelDirectoryDialog insert entry end $fullDirPath
-# This one clears the listbox for the new directory
-		redoDirectoryDialogListBox
-		if {$fileDisplayType=="Properties" && $fileNameList !=""} {
-	       		if {![winfo exist .fileDialogProperties]} {
-#Need to put show in twice if the window was previously destroyed
-				Window show .fileDialogProperties
-				Window show .fileDialogProperties
-				initDirectoryDialogProperties
-			}
-			set reFocusSelection [ScrolledListBoxFileViewDirectoryDialog curselection]
-			redoDirectoryDialogProperties
-			ScrolledListBoxFileViewDirectoryDialog selection set $reFocusSelection $reFocusSelection
-		}
+		RefreshBoxes
 	} -label "Mount Drive"
 # End Mount menu item
 #######################################
@@ -595,13 +558,14 @@ proc vTclWindow.directoryDialog {base} {
         -command {
 		set backLevelName $fullDirPath
 		set fullDirPath $env(HOME)
+		RefreshBoxes
 # cd to the directory
-		set r [cd $fullDirPath]
+#		set r [cd $fullDirPath]
 # Replace the current with the new selected path
-		ComboBoxUpLevelDirectoryDialog delete entry 0 end
-		ComboBoxUpLevelDirectoryDialog insert entry end $fullDirPath
+#		ComboBoxUpLevelDirectoryDialog delete entry 0 end
+#		ComboBoxUpLevelDirectoryDialog insert entry end $fullDirPath
 # This one clears the listbox for the new directory
-		redoDirectoryDialogListBox
+#		redoDirectoryDialogListBox
 	} -foreground black -height 56 -highlightcolor black \
         -image [vTcl:image:get_image [file join / usr local  OpenBlend Pics folder_home.gif]] -width 56 
 	vTcl:DefineAlias "$site_8_0.homeDirButton" "ButtonHomeDirDirectoryDialog" vTcl:WidgetProc "Toplevel1" 1
@@ -614,42 +578,7 @@ proc vTclWindow.directoryDialog {base} {
 		set backLevelName $fullDirPath
 		set fullDirPath $env(HOME)
 		append fullDirPath {/Desktop}
-# cd to the directory
-		set r [cd $fullDirPath]
-# Unable to get the unique property working.  This code
-# prevents duplicates
-		set duplicateTrigger 0
-		foreach tmpvar $upLevelComboBoxListVar {
-                        	if {$fullDirPath == $tmpvar} {
-				set duplicateTrigger 1
-				break
-			}
-		}
-		if {$duplicateTrigger == 0} {
-# If not a duplicate then add the path to the combobox and sort it.
-# Then clear the combobox and refresh it.
-			set upLevelComboBoxListVar [lsort [lappend upLevelComboBoxListVar $fullDirPath]]
-			ComboBoxUpLevelDirectoryDialog clear
-			foreach tmpvar $upLevelComboBoxListVar {
-				ComboBoxUpLevelDirectoryDialog insert list end $tmpvar
-               		}
-		}
-# Replace the current with the new selected path
-		ComboBoxUpLevelDirectoryDialog delete entry 0 end
-		ComboBoxUpLevelDirectoryDialog insert entry end $fullDirPath
-# This one clears the listbox for the new directory
-		redoDirectoryDialogListBox
-		if {$fileDisplayType=="Properties" && $fileNameList !=""} {
-	       		if {![winfo exist .fileDialogProperties]} {
-#Need to put show in twice if the window was previously destroyed
-				Window show .fileDialogProperties
-				Window show .fileDialogProperties
-				initDirectoryDialogProperties
-			}
-			set reFocusSelection [ScrolledListBoxFileViewDirectoryDialog curselection]
-			redoDirectoryDialogProperties
-			ScrolledListBoxFileViewDirectoryDialog selection set $reFocusSelection $reFocusSelection
-		}
+		RefreshBoxes
 	} -foreground black -height 56 -highlightcolor black \
         -image [vTcl:image:get_image [file join / usr local  OpenBlend Pics screen_green.gif]] -width 56 
 	vTcl:DefineAlias "$site_8_0.desktopDirButton" "ButtonDesktopDirDirectoryDialog" vTcl:WidgetProc "Toplevel1" 1
@@ -674,42 +603,7 @@ proc vTclWindow.directoryDialog {base} {
 				}
 			}
 		}
-# cd to the directory
-		set r [cd $fullDirPath]
-# Unable to get the unique property working.  This code
-# prevents duplicates
-		set duplicateTrigger 0
-		foreach tmpvar $upLevelComboBoxListVar {
-                        	if {$fullDirPath == $tmpvar} {
-				set duplicateTrigger 1
-				break
-			}
-		}
-			if {$duplicateTrigger == 0} {
-# If not a duplicate then add the path to the combobox and sort it.
-# Then clear the combobox and refresh it.
-			set upLevelComboBoxListVar [lsort [lappend upLevelComboBoxListVar $fullDirPath]]
-			ComboBoxUpLevelDirectoryDialog clear
-			foreach tmpvar $upLevelComboBoxListVar {
-				ComboBoxUpLevelDirectoryDialog insert list end $tmpvar
-               		}
-		}
-# Replace the current with the new selected path
-		ComboBoxUpLevelDirectoryDialog delete entry 0 end
-		ComboBoxUpLevelDirectoryDialog insert entry end $fullDirPath
-# This one clears the listbox for the new directory
-		redoDirectoryDialogListBox
-		if {$fileDisplayType=="Properties" && $fileNameList !=""} {
-	       		if {![winfo exist .fileDialogProperties]} {
-#Need to put show in twice if the window was previously destroyed
-				Window show .fileDialogProperties
-				Window show .fileDialogProperties
-				initDirectoryDialogProperties
-			}
-			set reFocusSelection [ScrolledListBoxFileViewDirectoryDialog curselection]
-			redoDirectoryDialogProperties
-			ScrolledListBoxFileViewDirectoryDialog selection set $reFocusSelection $reFocusSelection
-		}
+		RefreshBoxes
 	} -foreground black -height 56 -highlightcolor black \
         -image [vTcl:image:get_image [file join / usr local  OpenBlend Pics document.gif]] -width 56 
 	vTcl:DefineAlias "$site_8_0.documentsDirButton" "ButtonDocumentsDirDirectoryDialog" vTcl:WidgetProc "Toplevel1" 1
@@ -726,43 +620,7 @@ proc vTclWindow.directoryDialog {base} {
 		if {![file exist $fullDirPath]} {
 			set fullDirPath "/mnt"
 		}
-# cd to the directory
-		set r [cd $fullDirPath]
-# Unable to get the unique property working.  This code
-# prevents duplicates
-		set duplicateTrigger 0
-		foreach tmpvar $upLevelComboBoxListVar {
-                        	if {$fullDirPath == $tmpvar} {
-				set duplicateTrigger 1
-				break
-			}
-		}
-		if {$duplicateTrigger == 0} {
-# If not a duplicate then add the path to the combobox and sort it.
-# Then clear the combobox and refresh it.
-			set upLevelComboBoxListVar [lsort [lappend upLevelComboBoxListVar $fullDirPath]]
-			ComboBoxUpLevelDirectoryDialog clear
-			foreach tmpvar $upLevelComboBoxListVar {
-				ComboBoxUpLevelDirectoryDialog insert list end $tmpvar
-               		}
-		}
-
-# Replace the current with the new selected path
-		ComboBoxUpLevelDirectoryDialog delete entry 0 end
-		ComboBoxUpLevelDirectoryDialog insert entry end $fullDirPath
-# This one clears the listbox for the new directory
-		redoDirectoryDialogListBox
-		if {$fileDisplayType=="Properties" && $fileNameList !=""} {
-	       		if {![winfo exist .fileDialogProperties]} {
-#Need to put show in twice if the window was previously destroyed
-				Window show .fileDialogProperties
-				Window show .fileDialogProperties
-				initDirectoryDialogProperties
-			}
-			set reFocusSelection [ScrolledListBoxFileViewDirectoryDialog curselection]
-			redoDirectoryDialogProperties
-			ScrolledListBoxFileViewDirectoryDialog selection set $reFocusSelection $reFocusSelection
-		}
+		RefreshBoxes
 	} -foreground black -height 56 -highlightcolor black \
         -image [vTcl:image:get_image [file join / usr local  OpenBlend Pics 3floppy_unmount.gif]] -width 56 
 	vTcl:DefineAlias "$site_8_0.floppyDirButton" "ButtonFloppyDirDirectoryDialog" vTcl:WidgetProc "Toplevel1" 1
@@ -780,42 +638,7 @@ proc vTclWindow.directoryDialog {base} {
 			set fullDirPath "/media"
 		}
 		if {[file exist $fullDirPath]} {
-# cd to the directory
-			set r [cd $fullDirPath]
-# Unable to get the unique property working.  This code
-# prevents duplicates
-			set duplicateTrigger 0
-			foreach tmpvar $upLevelComboBoxListVar {
-                	        	if {$fullDirPath == $tmpvar} {
-					set duplicateTrigger 1
-					break
-				}
-			}
-			if {$duplicateTrigger == 0} {
-# If not a duplicate then add the path to the combobox and sort it.
-# Then clear the combobox and refresh it.
-				set upLevelComboBoxListVar [lsort [lappend upLevelComboBoxListVar $fullDirPath]]
-				ComboBoxUpLevelDirectoryDialog clear
-				foreach tmpvar $upLevelComboBoxListVar {
-					ComboBoxUpLevelDirectoryDialog insert list end $tmpvar
-        			}
-			}
-# Replace the current with the new selected path
-			ComboBoxUpLevelDirectoryDialog delete entry 0 end
-			ComboBoxUpLevelDirectoryDialog insert entry end $fullDirPath
-# This one clears the listbox for the new directory
-			redoDirectoryDialogListBox
-			if {$fileDisplayType=="Properties" && $fileNameList !=""} {
-	       			if {![winfo exist .fileDialogProperties]} {
-#Need to put show in twice if the window was previously destroyed
-					Window show .fileDialogProperties
-					Window show .fileDialogProperties
-					initDirectoryDialogProperties
-				}
-				set reFocusSelection [ScrolledListBoxFileViewDirectoryDialog curselection]
-				redoDirectoryDialogProperties
-				ScrolledListBoxFileViewDirectoryDialog selection set $reFocusSelection $reFocusSelection
-			}
+			RefreshBoxes
 		} else {
 			set fullDirPath $backLevelName
 		}
@@ -832,44 +655,9 @@ proc vTclWindow.directoryDialog {base} {
 # Set to slash now but in future will point to a newtwork path
 		set fullDirPath "/mnt"
 		if {[file exist $fullDirPath]} {
-# cd to the directory
-			set r [cd $fullDirPath]
-# Unable to get the unique property working.  This code
-# prevents duplicates
-			set duplicateTrigger 0
-			foreach tmpvar $upLevelComboBoxListVar {
-	                        	if {$fullDirPath == $tmpvar} {
-					set duplicateTrigger 1
-					break
-				}
-			}
-			if {$duplicateTrigger == 0} {
-# If not a duplicate then add the path to the combobox and sort it.
-# Then clear the combobox and refresh it.
-				set upLevelComboBoxListVar [lsort [lappend upLevelComboBoxListVar $fullDirPath]]
-				ComboBoxUpLevelDirectoryDialog clear
-				foreach tmpvar $upLevelComboBoxListVar {
-					ComboBoxUpLevelDirectoryDialog insert list end $tmpvar
-				}
-			}
-# Replace the current with the new selected path
-			ComboBoxUpLevelDirectoryDialog delete entry 0 end
-			ComboBoxUpLevelDirectoryDialog insert entry end $fullDirPath
-# This one clears the listbox for the new directory
-			redoDirectoryDialogListBox
-			if {$fileDisplayType=="Properties" && $fileNameList !=""} {
-				if {![winfo exist .fileDialogProperties]} {
-#Need to put show in twice if the window was previously destroyed
-					Window show .fileDialogProperties
-					Window show .fileDialogProperties
-					initDirectoryDialogProperties
-				}
-				set reFocusSelection [ScrolledListBoxFileViewDirectoryDialog curselection]
-				redoDirectoryDialogProperties
-				ScrolledListBoxFileViewDirectoryDialog selection set $reFocusSelection $reFocusSelection
-			}
+			RefreshBoxes
 		} else {
-			set fullDirPath $backLevelName
+#			set fullDirPath $backLevelName
 		}
 	} -foreground black -height 56 -highlightcolor black \
         -image [vTcl:image:get_image [file join / usr local  OpenBlend Pics gnome_dev_harddisk.gif]] -width 56 
@@ -884,42 +672,7 @@ proc vTclWindow.directoryDialog {base} {
 # Set to slash now but in future will point to a newtwork path
 		set fullDirPath "/media"
 		if {[file exist $fullDirPath]} {
-# cd to the directory
-			set r [cd $fullDirPath]
-# Unable to get the unique property working.  This code
-# prevents duplicates
-			set duplicateTrigger 0
-			foreach tmpvar $upLevelComboBoxListVar {
-	                        	if {$fullDirPath == $tmpvar} {
-					set duplicateTrigger 1
-					break
-				}
-			}
-			if {$duplicateTrigger == 0} {
-# If not a duplicate then add the path to the combobox and sort it.
-# Then clear the combobox and refresh it.
-				set upLevelComboBoxListVar [lsort [lappend upLevelComboBoxListVar $fullDirPath]]
-				ComboBoxUpLevelDirectoryDialog clear
-				foreach tmpvar $upLevelComboBoxListVar {
-					ComboBoxUpLevelDirectoryDialog insert list end $tmpvar
-				}
-			}
-# Replace the current with the new selected path
-			ComboBoxUpLevelDirectoryDialog delete entry 0 end
-			ComboBoxUpLevelDirectoryDialog insert entry end $fullDirPath
-# This one clears the listbox for the new directory
-			redoDirectoryDialogListBox
-			if {$fileDisplayType=="Properties" && $fileNameList !=""} {
-				if {![winfo exist .fileDialogProperties]} {
-#Need to put show in twice if the window was previously destroyed
-					Window show .fileDialogProperties
-					Window show .fileDialogProperties
-					initDirectoryDialogProperties
-				}
-				set reFocusSelection [ScrolledListBoxFileViewDirectoryDialog curselection]
-				redoDirectoryDialogProperties
-				ScrolledListBoxFileViewDirectoryDialog selection set $reFocusSelection $reFocusSelection
-			}
+			RefreshBoxes
 		} else {
 			set fullDirPath $backLevelName
 		}
@@ -933,45 +686,10 @@ proc vTclWindow.directoryDialog {base} {
 #        -borderwidth 0 -relief flat -highlightthickness 0 \
 #        -command {
 #		set backLevelName $fullDirPath
-## Set to slash now but in future will point to a newtwork path
-#		set fullDirPath "/mnt"
+# Set to slash now but in future will point to a newtwork path
+#		set fullDirPath "smb:/"
 #		if {[file exist $fullDirPath]} {
-## cd to the directory
-#			set r [cd $fullDirPath]
-## Unable to get the unique property working.  This code
-## prevents duplicates
-#			set duplicateTrigger 0
-#			foreach tmpvar $upLevelComboBoxListVar {
-#	                        	if {$fullDirPath == $tmpvar} {
-#					set duplicateTrigger 1
-#					break
-#				}
-#			}
-#			if {$duplicateTrigger == 0} {
-## If not a duplicate then add the path to the combobox and sort it.
-## Then clear the combobox and refresh it.
-#				set upLevelComboBoxListVar [lsort [lappend upLevelComboBoxListVar $fullDirPath]]
-#				ComboBoxUpLevelDirectoryDialog clear
-#				foreach tmpvar $upLevelComboBoxListVar {
-#					ComboBoxUpLevelDirectoryDialog insert list end $tmpvar
-#				}
-#			}
-## Replace the current with the new selected path
-#			ComboBoxUpLevelDirectoryDialog delete entry 0 end
-#			ComboBoxUpLevelDirectoryDialog insert entry end $fullDirPath
-## This one clears the listbox for the new directory
-#			redoDirectoryDialogListBox
-#			if {$fileDisplayType=="Properties" && $fileNameList !=""} {
-#				if {![winfo exist .fileDialogProperties]} {
-##Need to put show in twice if the window was previously destroyed
-#					Window show .fileDialogProperties
-#					Window show .fileDialogProperties
-#					initDirectoryDialogProperties
-#				}
-#				set reFocusSelection [ScrolledListBoxFileViewDirectoryDialog curselection]
-#				redoDirectoryDialogProperties
-#				ScrolledListBoxFileViewDirectoryDialog selection set $reFocusSelection $reFocusSelection
-#			}
+#			RefreshBoxes
 #		} else {
 #			set fullDirPath $backLevelName
 #		}
@@ -980,7 +698,6 @@ proc vTclWindow.directoryDialog {base} {
 #	vTcl:DefineAlias "$site_8_0.networkDirButton" "ButtonNetworkDirDirectoryDialog" vTcl:WidgetProc "Toplevel1" 1
 #	pack $site_8_0.networkDirButton -in $site_8_0 -anchor center -expand 1 -fill none -side top
 #	balloon $site_8_0.networkDirButton "Network"
-
 
 	pack $site_3_0.frameLeft -in $site_3_0 -anchor nw -expand 1 -fill y -side left
 
@@ -1017,6 +734,7 @@ proc vTclWindow.directoryDialog {base} {
 			destroy window .directoryDialog
 		}
 	} -width 57 -image [vTcl:image:get_image [file join / opt FreeFactory Pics open.gif]]
+	pack $site_5_0.openButton -in $site_5_0 -anchor nw -expand 1 -fill x -side top
 	vTcl:DefineAlias "$site_5_0.openButton" "ButtonOpenDirectoryDialog" vTcl:WidgetProc "Toplevel1" 1
 	balloon $site_5_0.openButton "Open"
 
@@ -1039,8 +757,9 @@ proc vTclWindow.directoryDialog {base} {
 			destroy .fileRename
 		}
 		destroy window .directoryDialog
-	} -width 5 -foreground black -highlightcolor black -text Cancel \
-	-image {}
+	} -width 5 -foreground black -highlightcolor black \
+	-image [vTcl:image:get_image [file join / opt FreeFactory Pics exit20x20.gif]]
+	pack $site_5_0.cancelButton -in $site_5_0 -anchor nw -expand 1 -fill x -side bottom
 	vTcl:DefineAlias "$site_5_0.cancelButton" "ButtonCancelDirectoryDialog" vTcl:WidgetProc "Toplevel1" 1
 	balloon $site_5_0.cancelButton "Cancel"
 
@@ -1063,9 +782,9 @@ proc vTclWindow.directoryDialog {base} {
 
 #    pack $site_5_0.fileTypeLabel \
 #        -in $site_5_0 -anchor nw -expand 1 -fill none -side left
-	pack $site_5_0.openButton -in $site_5_0 -anchor nw -expand 1 -fill none -side top
 
-	pack $site_5_0.cancelButton -in $site_5_0 -anchor nw -expand 1 -fill none -side bottom
+
+
 
 #    pack $site_5_0.fileTypeComboBox \
 #        -in $site_5_0 -anchor nw -expand 1 -fill none -side left
@@ -1668,11 +1387,8 @@ proc ::initDirectoryDialog {} {
 ## Procedure:  redoDirectoryDialogListBox
 
 proc ::redoDirectoryDialogListBox {} {
+	global PPref selectFileType fileDisplayType
 #This clears and refills the listbox for all actions
-	global PPref
-	global fullDirPath fileDisplayType selectFileType PPref directoryCount
-	global upLevelComboBoxListVar itemFileName dirpathProperty fileNameList
-	global noChangesPermissions noChangesOwnerGroup fileLinkPath
 	set directoryNameList {}
 	set fileNameList {}
 # Get everything once and filter in the loop	Previous method looped twice once for the dirs and then
@@ -2683,3 +2399,57 @@ proc ::findDirectoryDialogResursiveSearch {} {
 }
 ## End findDirectoryDialogResursiveSearch
 #############################################################################
+#############################################################################
+## Procedure:  RefreshBoxes
+proc ::RefreshBoxes {} {
+	global fileDisplayType fileNameList
+	global itemFileName fullDirPath dirpathProperty dirpathPropertyTmp
+	global noChangesPermissions noChangesOwnerGroup fileLinkPath
+	global PPref selectFileType directoryCount upLevelComboBoxListVar
+# cd to the directory
+	set r [cd $fullDirPath]
+# Unable to get the unique property working.  This code
+# prevents duplicates
+	set duplicateTrigger 0
+	foreach tmpvar $upLevelComboBoxListVar {
+		if {$fullDirPath == $tmpvar} {
+			set duplicateTrigger 1
+			break
+		}
+	}
+	if {$duplicateTrigger == 0} {
+# If not a duplicate then add the path to the combobox and sort it.
+# Then clear the combobox and refresh it.
+		set upLevelComboBoxListVar [lsort [lappend upLevelComboBoxListVar $fullDirPath]]
+		ComboBoxUpLevelDirectoryDialog clear
+		foreach tmpvar $upLevelComboBoxListVar {
+			ComboBoxUpLevelDirectoryDialog insert list end $tmpvar
+		}
+	}
+# Replace the current with the new selected path
+	ComboBoxUpLevelDirectoryDialog delete entry 0 end
+	ComboBoxUpLevelDirectoryDialog insert entry end $fullDirPath
+# This one clears the listbox for the new directory
+	redoDirectoryDialogListBox
+	if {$fileDisplayType=="Properties" && $fileNameList !=""} {
+		if {![winfo exist .fileDialogProperties]} {
+#Need to put show in twice if the window was previously destroyed
+			Window show .fileDialogProperties
+			Window show .fileDialogProperties
+			initDirectoryDialogProperties
+		}
+		set reFocusSelection [ScrolledListBoxFileViewDirectoryDialog curselection]
+		redoDirectoryDialogProperties
+		ScrolledListBoxFileViewDirectoryDialog selection set $reFocusSelection $reFocusSelection
+	}
+}
+## End RefreshBoxes
+#############################################################################
+
+
+
+
+
+
+
+

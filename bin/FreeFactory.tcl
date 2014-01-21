@@ -200,11 +200,20 @@ foreach img {
 	{{[file join / opt FreeFactory Pics icon-printer32x32.gif]} {user image} user {}}
 	{{[file join / opt FreeFactory Pics HPLaserJet32x32.gif]} {user image} user {}}
 	{{[file join / opt FreeFactory Pics gtk-save32x32.gif]} {user image} user {}}
+	{{[file join / opt FreeFactory Pics log4-32x32.gif]} {user image} user {}}
+	{{[file join / opt FreeFactory Pics AddFactoryLink32x32.gif]} {user image} user {}}
+	{{[file join / opt FreeFactory Pics AddEMailUser32x32.gif]} {user image} user {}}
+	{{[file join / opt FreeFactory Pics RemoveFactoryLink32x32.gif]} {user image} user {}}
+	{{[file join / opt FreeFactory Pics RemoveEMailUser32x32.gif]} {user image} user {}}
+	{{[file join / opt FreeFactory Pics message32x32.gif]} {user image} user {}}
+	{{[file join / opt FreeFactory Pics reload32x32.gif]} {user image} user {}}
 	{{[file join / opt FreeFactory Pics exit32x32.gif]} {user image} user {}}
+	{{[file join / opt FreeFactory Pics exit20x20.gif]} {user image} user {}}
 	{{[file join / opt FreeFactory Pics document32x32.gif]} {user image} user {}}
 	{{[file join / opt FreeFactory Pics help_index32x32.gif]} {user image} user {}}
 	{{[file join / opt FreeFactory Pics gtk-stop32x32.gif]} {user image} user {}}
 	{{[file join / opt FreeFactory Pics new32x32.gif]} {user image} user {}}
+	{{[file join / opt FreeFactory Pics new.gif]} {user image} user {}}
 	{{[file join / opt FreeFactory Pics open32x32.gif]} {user image} user {}}
 	{{[file join / opt FreeFactory Pics saveAs32x30.gif]} {user image} user {}}
 	{{[file join / opt FreeFactory Pics 3floppy_unmount.gif]} {user image} user {}}
@@ -230,6 +239,8 @@ foreach img {
 	{{[file join / opt FreeFactory Pics tool.gif]} {user image} user {}}
 	{{[file join / opt FreeFactory Pics tool2.gif]} {user image} user {}}
 	{{[file join / opt FreeFactory Pics cdrom_mount.gif]} {user image} user {}}
+	{{[file join / opt FreeFactory Pics update32x32.gif]} {user image} user {}}
+	{{[file join / opt FreeFactory Pics update32x32.gif]} {user image} user {}}
 	{{[file join / opt FreeFactory Pics PicNotAvailable.gif]} {user image} user {}}
 	    } {
 	eval set _file [lindex $img 0]
@@ -518,6 +529,36 @@ proc ::writeSettingsFile {} {
 	puts $PrefFileHandle "FONTTEXT=$PPref(fonts,text)"
 	puts $PrefFileHandle "THECOMPANYNAME=$PPref(TheCompanyName)"
 	puts $PrefFileHandle "APPLEDELAY=$PPref(AppleDelay)"
+	puts $PrefFileHandle "FFMXPROGRAM=$PPref(FFMxProgram)"
+	puts $PrefFileHandle "RUNFROM=$PPref(RunFrom)"
+	puts $PrefFileHandle "ENABLEEMAIL=$PPref(EnableEMail)"
+	puts $PrefFileHandle "ENABLEFACTORYLINKING=$PPref(EnableFactoryLinking)"
+	puts $PrefFileHandle "RUNFROM=$PPref(RunFrom)"
+	puts $PrefFileHandle "FTPTRANSFERTYPE=$PPref(FTPTransferType)"
+	puts $PrefFileHandle "FTPDELETEAFTER=$PPref(FTPDeleteAfter)"
+	puts $PrefFileHandle "ENABLEFACTORY=$PPref(EnableFactory)"
+	puts $PrefFileHandle "DELETESOURCE=$PPref(DeleteSource)"
+	puts $PrefFileHandle "DELETELOGS=$PPref(DeleteLogs)"
+	puts $PrefFileHandle "FREEFACTORYACTION=$PPref(FreeFactoryAction)"
+	puts $PrefFileHandle "SMTPEMAILSERVER=$PPref(SMTPEMailServer)"
+	puts $PrefFileHandle "SMTPEMAILPORT=$PPref(SMTPEMailPort)"
+	puts $PrefFileHandle "SMTPEMAILUSERNAME=$PPref(SMTPEMailUserName)"
+# Code to encode password
+	set PasswordChars [string length $PPref(SMTPEMailPassword)]
+	set EncodedPassword ""
+	for {set x 0} {$x < $PasswordChars} {incr x} {
+		set EncodedChar  [format %c [expr [scan [string index $PPref(SMTPEMailPassword) $x] %c] + 128]]
+		append EncodedPassword $EncodedChar
+	}
+	puts $PrefFileHandle "SMTPEMAILPASSWORD=$EncodedPassword"
+	puts $PrefFileHandle "SMTPEMAILFROMNAME=$PPref(SMTPEMailFromName)"
+	puts $PrefFileHandle "SMTPEMAILFROMADDRESS=$PPref(SMTPEMailFromAddress)"
+	puts $PrefFileHandle "SMTPEMAILTLS=$PPref(SMTPEMailTLS)"
+	puts $PrefFileHandle "GLOBALEMAILMESSAGESTART="
+	if {[string trim $PPref(GlobalEMailMessage)] != ""} {
+		puts $PrefFileHandle $PPref(GlobalEMailMessage)
+	}
+	puts $PrefFileHandle "GLOBALEMAILMESSAGEEND"
 	puts $PrefFileHandle "PDFREADERPATH=$PPref(PDFReaderPath)"
 	puts $PrefFileHandle "FOUNDRYTOOLTIP=$PPref(Foundry,ToolTip)"
 	puts $PrefFileHandle "TOOLTIPFONTS=$PPref(fonts,ToolTip)"
@@ -782,6 +823,42 @@ proc vTclWindow. {base} {
 					"FONTTEXT" {set PPref(fonts,text) $PrefValue}
 					"THECOMPANYNAME" {set PPref(TheCompanyName) $PrefValue}
 					"APPLEDELAY" {set PPref(AppleDelay) $PrefValue}
+					"FFMXPROGRAM" {set PPref(FFMxProgram) $PrefValue}
+					"RUNFROM" {set PPref(RunFrom) $PrefValue}
+					"ENABLEEMAIL" {set PPref(EnableEMail) $PrefValue}
+					"ENABLEFACTORYLINKING" {set PPref(EnableFactoryLinking) $PrefValue}
+					"FTPTRANSFERTYPE" {set PPref(FTPTransferType) $PrefValue}
+					"FTPDELETEAFTER" {set PPref(FTPDeleteAfter) $PrefValue}
+					"ENABLEFACTORY" {set PPref(EnableFactory) $PrefValue}
+					"DELETESOURCE" {set PPref(DeleteSource) $PrefValue}
+					"DELETELOGS" {set PPref(DeleteLogs) $PrefValue}
+					"FREEFACTORYACTION" {set PPref(FreeFactoryAction) $PrefValue}
+					"SMTPEMAILSERVER" {set PPref(SMTPEMailServer) $PrefValue}
+					"SMTPEMAILPORT" {set PPref(SMTPEMailPort) $PrefValue}
+					"SMTPEMAILUSERNAME" {set PPref(SMTPEMailUserName) $PrefValue}
+					"SMTPEMAILPASSWORD" {
+# This will decode the Email password variable
+						set PasswordChars [string length $PrefValue]
+						set DecodedPassword ""
+						for {set x 0} {$x < $PasswordChars} {incr x} {
+							set DecodedChar  [format %c [expr [scan [string index $PrefValue $x] %c] - 128]]
+							append DecodedPassword $DecodedChar
+						}
+						set PPref(SMTPEMailPassword) $DecodedPassword
+					}
+					"SMTPEMAILFROMNAME" {set PPref(SMTPEMailFromName) $PrefValue}
+					"SMTPEMAILFROMADDRESS" {set PPref(SMTPEMailFromAddress) $PrefValue}
+					"SMTPEMAILTLS" {set PPref(SMTPEMailTLS) $PrefValue}
+					"GLOBALEMAILMESSAGESTART" {
+						set PPref(GlobalEMailMessage) ""
+						set FactoryValue ""
+						while {![eof $PrefFileHandle] && $FactoryValue !="GLOBALEMAILMESSAGEEND"} {
+							gets $PrefFileHandle FactoryValue
+							if {$FactoryValue != "GLOBALEMAILMESSAGEEND"} {
+								append PPref(GlobalEMailMessage) $FactoryValue\n
+							}
+						}
+					}
 					"PDFREADERPATH" {set PPref(PDFReaderPath) $PrefValue}
 					"FOUNDRYTOOLTIP" {set PPref(Foundry,ToolTip) $PrefValue}
 					"TOOLTIPFONTS" {set PPref(fonts,ToolTip) $PrefValue}
@@ -800,7 +877,6 @@ proc vTclWindow. {base} {
 		close $PrefFileHandle
 		set TheCompanyName $PPref(TheCompanyName)
 		set AppleDelay $PPref(AppleDelay)
-
 	}
 	set FileHandle [open "/opt/FreeFactory/VERSION" r]
 	gets $FileHandle FreeFactoryInstalledVERSION
@@ -824,9 +900,8 @@ proc vTclWindow. {base} {
 	wm title .programFrontEnd $WindowTitle
 
 #############################################################################
+# Update widgets on main GUI.
 	widgetUpdate
-#
-#
 #############################################################################
 #############################################################################
 #
